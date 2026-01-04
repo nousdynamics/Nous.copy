@@ -68,7 +68,7 @@ export default function Login({ onLoginSuccess }) {
           >
             <div className="flex items-center justify-center gap-4 mb-4">
             <img
-            src="src/assets/LOGO NOUS COPY COMPLETA.png"
+            src="assets/LOGO NOUS COPY COMPLETA.png"
             alt="Nous Copy Logo"
             className="h-16 w-auto"
             />
