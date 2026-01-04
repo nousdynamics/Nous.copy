@@ -4,7 +4,10 @@ import OpenAI from "openai";
 const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
 if (!apiKey) {
-  console.warn('VITE_OPENAI_API_KEY não configurada. Funcionalidade de IA desabilitada.');
+  console.error('❌ VITE_OPENAI_API_KEY não configurada!');
+  console.error('⚠️ Configure a chave da API OpenAI no arquivo .env:');
+  console.error('   VITE_OPENAI_API_KEY=sk-sua_chave_aqui');
+  console.error('   Obtenha sua chave em: https://platform.openai.com/api-keys');
 }
 
 const openai = apiKey ? new OpenAI({
@@ -16,71 +19,106 @@ const openai = apiKey ? new OpenAI({
  * Gera uma copy usando OpenAI
  * @param {Object} params - Parâmetros para geração
  * @param {string} params.prompt - Prompt para a IA
- * @param {string} params.model - Modelo a ser usado (padrão: gpt-5-nano)
+ * @param {string} params.model - Modelo a ser usado (padrão: gpt-4.1)
  * @param {boolean} params.store - Se deve armazenar a resposta
  * @returns {Promise<string>} Texto gerado pela IA
  */
-export async function generateWithOpenAI({ prompt, model = "gpt-5-nano", store = true }) {
-  if (!openai) {
-    throw new Error('OpenAI API key não configurada. Configure VITE_OPENAI_API_KEY nas variáveis de ambiente.');
+export async function generateWithOpenAI({ prompt, model = "gpt-4.1", instructions = null, store = true }) {
+  // Verificar novamente a chave (pode ter sido atualizada)
+  const currentApiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  
+  if (!currentApiKey || currentApiKey.trim() === '' || !openai) {
+    const errorMsg = 'OpenAI API key não configurada!\n\n' +
+      'Para corrigir:\n' +
+      '1. Crie um arquivo .env na raiz do projeto\n' +
+      '2. Adicione a linha: VITE_OPENAI_API_KEY=sk-sua_chave_aqui\n' +
+      '3. Obtenha sua chave em: https://platform.openai.com/api-keys\n' +
+      '4. Reinicie o servidor de desenvolvimento (npm run dev)';
+    throw new Error(errorMsg);
+  }
+  
+  // Validar formato da chave
+  if (!currentApiKey.startsWith('sk-')) {
+    throw new Error('A chave da API OpenAI parece estar incorreta. Ela deve começar com "sk-". Verifique o arquivo .env');
   }
 
+  // Mapear modelos para versões disponíveis (usando nova API)
+  const modelMap = {
+    'gpt-5-nano': 'gpt-4.1',
+    'gpt-4-turbo-preview': 'gpt-4.1',
+    'gpt-4': 'gpt-4.1',
+    'gpt-3.5-turbo': 'gpt-4.1',
+    'gpt-4o': 'gpt-4.1',
+    'gpt-4o-mini': 'gpt-4.1',
+    'gpt-5': 'gpt-5',
+    'gpt-5.2': 'gpt-5.2',
+    'gpt-4.1': 'gpt-4.1'
+  };
+  
+  const modelToUse = modelMap[model] || 'gpt-4.1';
+
   try {
-    // Tentar usar a API customizada primeiro
-    if (openai.responses && openai.responses.create) {
-      const response = await openai.responses.create({
-        model: model,
-        input: prompt,
-        store: store,
-      });
-      
-      return response.output_text || response.text || response;
-    }
-    
-    // Fallback para API padrão do OpenAI
-    const completion = await openai.chat.completions.create({
-      model: model, // Usar modelo selecionado
-      messages: [
-        {
-          role: "system",
-          content: "Você é um especialista em copywriting de alta performance. Gere copies persuasivas e emocionais que convertem."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 500,
+    // Usar a nova Responses API
+    const response = await openai.responses.create({
+      model: modelToUse,
+      instructions: instructions || "Você é um especialista em copywriting de alta performance. Gere copies persuasivas e emocionais que convertem. Seja específico, criativo e sempre focado em resultados.",
+      input: prompt,
+      reasoning: modelToUse.includes('gpt-5') || modelToUse.includes('o3') ? { effort: "medium" } : undefined
     });
     
-    return completion.choices[0]?.message?.content || "";
+    // Extrair texto da resposta - tentar diferentes formatos
+    let content = '';
+    
+    // Primeiro, tentar output_text (se disponível no SDK)
+    if (response.output_text) {
+      content = response.output_text;
+    }
+    // Segundo, tentar extrair do array output (estrutura real da API)
+    else if (response.output && Array.isArray(response.output) && response.output.length > 0) {
+      // Procurar por mensagens do tipo "message" com conteúdo de texto
+      for (const outputItem of response.output) {
+        if (outputItem.type === 'message' && outputItem.content && Array.isArray(outputItem.content)) {
+          for (const contentItem of outputItem.content) {
+            // Extrair texto de itens do tipo "output_text" (conforme exemplo da API)
+            if (contentItem.type === 'output_text' && contentItem.text) {
+              content += (content.length > 0 ? '\n\n' : '') + contentItem.text;
+            }
+          }
+        }
+      }
+    }
+    // Fallback: tentar acessar diretamente
+    else if (response.output?.[0]?.content?.[0]?.text) {
+      content = response.output[0].content[0].text;
+    }
+    
+    if (!content || content.trim() === '') {
+      console.error('Resposta da API não contém texto:', JSON.stringify(response, null, 2));
+      throw new Error('A IA não retornou nenhum conteúdo. Verifique os logs do console para mais detalhes.');
+    }
+    
+    return content.trim();
   } catch (error) {
     console.error("Erro ao gerar com OpenAI:", error);
     
-    // Se a API customizada falhar, tentar API padrão
-    try {
-      const completion = await openai.chat.completions.create({
-        model: model === "gpt-4-turbo-preview" || model === "gpt-4" ? "gpt-3.5-turbo" : model,
-        messages: [
-          {
-            role: "system",
-            content: "Você é um especialista em copywriting de alta performance."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 500,
-      });
-      
-      return completion.choices[0]?.message?.content || "";
-    } catch (fallbackError) {
-      console.error("Erro no fallback:", fallbackError);
-      throw new Error("Não foi possível gerar a copy com IA. Tente novamente.");
+    // Mensagens de erro mais específicas
+    if (error.message && (error.message.includes('API key') || error.message.includes('401'))) {
+      throw new Error('Chave da API OpenAI inválida ou não configurada. Verifique VITE_OPENAI_API_KEY no arquivo .env');
     }
+    
+    if (error.message && error.message.includes('rate limit')) {
+      throw new Error('Limite de requisições excedido. Aguarde alguns instantes e tente novamente.');
+    }
+    
+    if (error.message && error.message.includes('insufficient_quota')) {
+      throw new Error('Cota da API OpenAI esgotada. Verifique seu saldo na conta da OpenAI.');
+    }
+    
+    if (error.message && error.message.includes('model')) {
+      throw new Error('Modelo não disponível. Verifique se você tem acesso ao modelo solicitado na sua conta OpenAI.');
+    }
+    
+    throw new Error(`Erro ao gerar copy com IA: ${error.message || 'Erro desconhecido'}`);
   }
 }
 
@@ -91,7 +129,9 @@ export async function generateWithOpenAI({ prompt, model = "gpt-5-nano", store =
  * @returns {Promise<string>} Gancho gerado pela IA
  */
 export async function gerarGanchoComIA(dados, estrategia) {
-  const prompt = `Você é um copywriter de elite. Gere um GANCHO poderoso que:
+  const instructions = "Você é um copywriter de elite especializado em criar ganchos (hooks) poderosos que capturam atenção imediata e ativam gatilhos psicológicos. Seja específico, criativo e emocional.";
+  
+  const prompt = `Gere um GANCHO poderoso que:
 - Capture a atenção em 3 segundos (máximo 15 palavras)
 - Ative o gatilho psicológico: ${estrategia.pecado.nome} (${estrategia.pecado.gatilho})
 - Seja específico e não genérico
@@ -105,8 +145,8 @@ Contexto:
 
 Gere APENAS o gancho, sem explicações adicionais.`;
 
-  const model = dados.modeloIA || 'gpt-4-turbo-preview';
-  return await generateWithOpenAI({ prompt, model });
+  const model = dados.modeloIA || 'gpt-4.1';
+  return await generateWithOpenAI({ prompt, model, instructions, store: false });
 }
 
 /**
@@ -117,7 +157,9 @@ Gere APENAS o gancho, sem explicações adicionais.`;
  * @returns {Promise<string>} Corpo gerado pela IA
  */
 export async function gerarCorpoComIA(dados, estrategia, gancho) {
-  const prompt = `Você é um copywriter de elite. Gere o CORPO de uma copy que:
+  const instructions = "Você é um copywriter de elite especializado em criar corpos de copy persuasivos que desenvolvem argumentos convincentes, estabelecem autoridade e criam urgência emocional.";
+  
+  const prompt = `Gere o CORPO de uma copy que:
 - Inicie com uma frase de TRANSIÇÃO conectando ao gancho: "${gancho}"
 - Desenvolva a Premissa Lógica: ${estrategia.premissa}
 - Integre a Autoridade do Especialista: ${dados.anosExperiencia} anos de experiência, ${dados.resultadosComprovados}
@@ -132,8 +174,8 @@ Contexto:
 
 Gere APENAS o corpo, sem explicações adicionais.`;
 
-  const model = dados.modeloIA || 'gpt-4-turbo-preview';
-  return await generateWithOpenAI({ prompt, model });
+  const model = dados.modeloIA || 'gpt-4.1';
+  return await generateWithOpenAI({ prompt, model, instructions, store: false });
 }
 
 /**
@@ -143,7 +185,9 @@ Gere APENAS o corpo, sem explicações adicionais.`;
  * @returns {Promise<string>} CTA gerado pela IA
  */
 export async function gerarCTAComIA(dados, estrategia) {
-  const prompt = `Você é um copywriter de elite. Gere um CTA (Chamada para Ação) que:
+  const instructions = "Você é um copywriter de elite especializado em criar CTAs (Chamadas para Ação) claras, diretas e persuasivas que geram conversão.";
+  
+  const prompt = `Gere um CTA (Chamada para Ação) que:
 - Seja CLARO e DIRETO (máximo 2 frases)
 - Crie urgência ou esperança
 - Facilite a ação (não complique)
@@ -156,8 +200,8 @@ Contexto:
 
 Gere APENAS o CTA, sem explicações adicionais.`;
 
-  const model = dados.modeloIA || 'gpt-4-turbo-preview';
-  return await generateWithOpenAI({ prompt, model });
+  const model = dados.modeloIA || 'gpt-4.1';
+  return await generateWithOpenAI({ prompt, model, instructions, store: false });
 }
 
 /**
@@ -266,10 +310,14 @@ CORPO: [texto do corpo com etapas 2-7 integradas]
 
 CTA: [texto do CTA com etapas 7-8]`;
 
+  const instructions = "Você é um especialista em copywriting estratégico que analisa copies de concorrentes e adapta estruturas de alta performance seguindo metodologias comprovadas.";
+  
   try {
     const response = await generateWithOpenAI({ 
-      prompt, 
-      model: "gpt-4-turbo-preview" 
+      prompt: prompt,
+      instructions: instructions,
+      model: "gpt-4.1",
+      store: false
     });
 
     // Extrair gancho, corpo e CTA da resposta

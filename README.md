@@ -42,7 +42,7 @@ Crie um arquivo `.env` na raiz do projeto:
 VITE_SUPABASE_URL=https://seu-projeto.supabase.co
 VITE_SUPABASE_ANON_KEY=sua_chave_anon_aqui
 
-# OpenAI Configuration (Opcional)
+# OpenAI Configuration (OBRIGATÓRIO para gerar copies)
 VITE_OPENAI_API_KEY=sua_chave_openai_aqui
 ```
 
@@ -152,11 +152,14 @@ Templates personalizados que:
 
 ## 🤖 Integração OpenAI
 
-O Nous.Copy possui integração opcional com OpenAI para gerar copies mais personalizadas.
+O Nous.Copy utiliza **OBRIGATORIAMENTE** a API do OpenAI para gerar todas as copies. Não há método fallback - todas as copies são geradas usando inteligência artificial.
 
 ### Como Usar
 
-A integração é automática. Se a chave da API estiver configurada no `.env`, o sistema tentará usar a IA. Em caso de erro, usa o método padrão.
+1. Obtenha sua chave da API OpenAI em: https://platform.openai.com/api-keys
+2. Adicione no arquivo `.env`: `VITE_OPENAI_API_KEY=sk-sua_chave_aqui`
+3. Reinicie o servidor de desenvolvimento
+4. Todas as copies serão geradas usando GPT!
 
 ### Configuração
 

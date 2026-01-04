@@ -89,13 +89,9 @@ function App() {
         try {
           result = await gerarEstruturaInvisivelComIA(formData);
         } catch (error) {
-          console.warn('Erro ao gerar estrutura invisível com IA:', error);
-          // Fallback básico
-          result = {
-            gancho: 'Copy adaptada da estrutura do concorrente',
-            corpo: formData.copy_concorrente || 'Copy adaptada',
-            cta: 'Acesse agora e garanta seu resultado'
-          };
+          console.error('Erro ao gerar estrutura invisível com IA:', error);
+          // Não usar fallback - propagar o erro
+          throw error;
         }
         
         const copyResult = {
@@ -146,19 +142,20 @@ function App() {
         return copyResult;
       }
 
-      // Lógica normal para outros agentes
+      // Lógica normal para outros agentes - SEMPRE usar IA
       const estrategia = analiseEstrategica(formData);
       let gancho, corpo, cta;
       
+      // Sempre tentar usar IA primeiro
       try {
         gancho = await gerarGanchoIA(formData, estrategia);
         corpo = await gerarCorpoIA(formData, estrategia, gancho);
         cta = await gerarCTAIA(formData, estrategia);
       } catch (error) {
-        console.warn('Erro ao gerar com IA, usando fallback:', error);
-        gancho = gerarGancho(formData, estrategia);
-        corpo = gerarCorpo(formData, estrategia);
-        cta = gerarCTA(formData, estrategia);
+        console.error('Erro ao gerar copy com IA:', error);
+        // Não usar fallback - mostrar erro claro para o usuário
+        const errorMessage = error.message || 'Erro desconhecido ao gerar copy';
+        throw new Error(`Erro ao gerar copy: ${errorMessage}`);
       }
       
       if (formData.duracao) {
@@ -224,7 +221,17 @@ function App() {
     } catch (error) {
       console.error('Erro ao gerar copy:', error);
       if (showLoading) {
-        alert('Erro ao gerar copy. Tente novamente.');
+        // Mensagem de erro mais detalhada
+        const errorMessage = error.message || 'Erro desconhecido';
+        if (errorMessage.includes('API key')) {
+          alert('❌ Erro de Configuração:\n\nA chave da API OpenAI não está configurada ou é inválida.\n\nPor favor:\n1. Crie um arquivo .env na raiz do projeto\n2. Adicione: VITE_OPENAI_API_KEY=sua_chave_aqui\n3. Reinicie o servidor de desenvolvimento');
+        } else if (errorMessage.includes('rate limit')) {
+          alert('⚠️ Limite de Requisições:\n\nVocê excedeu o limite de requisições da API OpenAI.\n\nAguarde alguns minutos e tente novamente.');
+        } else if (errorMessage.includes('quota')) {
+          alert('💳 Cota Esgotada:\n\nSua cota da API OpenAI foi esgotada.\n\nVerifique seu saldo na conta da OpenAI.');
+        } else {
+          alert(`❌ Erro ao gerar copy:\n\n${errorMessage}\n\nVerifique sua conexão com a internet e tente novamente.`);
+        }
       }
       throw error;
     } finally {
