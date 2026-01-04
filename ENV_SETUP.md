@@ -15,7 +15,7 @@ VITE_SUPABASE_ANON_KEY=sb_publishable_QZ0ccOermmDNDHAopDMP5A_W5kLO71G
 
 # Configuração da OpenAI (OBRIGATÓRIO para gerar copies)
 # Obtenha sua chave em: https://platform.openai.com/api-keys
-VITE_OPENAI_API_KEY=sk-sua_chave_openai_aqui
+VITE_OPENAI_API_KEY=sk-sua_chave_aqui
 ```
 
 ## Como obter a chave da OpenAI
@@ -24,7 +24,7 @@ VITE_OPENAI_API_KEY=sk-sua_chave_openai_aqui
 2. Faça login na sua conta OpenAI
 3. Clique em "Create new secret key"
 4. Copie a chave (ela começa com `sk-`)
-5. Cole no arquivo `.env` no lugar de `sk-sua_chave_openai_aqui`
+5. Cole no arquivo `.env` no lugar de `sk-sua_chave_aqui`
 
 ## Após configurar
 
