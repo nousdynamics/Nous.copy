@@ -1,318 +1,323 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  User, 
   Briefcase, 
   Target, 
   Zap, 
   Cpu, 
   Layout, 
-  Clock, 
-  Type, 
-  Link as LinkIcon,
-  Sparkles
+  Sparkles,
+  X,
+  Lock,
+  AlertCircle,
+  Save
 } from 'lucide-react';
+import { BASE_FIELDS, FORM_BLOCKS, BLOCK_LABELS, getFieldsByBlock, getFieldById } from '../utils/formSchema';
+import DynamicFormField from './DynamicFormField';
+import { adaptFormDataToLegacy } from '../utils/formDataAdapter';
+import CreateTemplateModal from './pages/CreateTemplateModal';
 
-export default function CopyForm({ onSubmit, loading = false, prefilledData = null }) {
-  const [formData, setFormData] = useState({
-    nomeProfissional: '',
-    anosExperiencia: '',
-    resultadosComprovados: '',
-    diferencialCompetitivo: '',
-    publicoAlvo: '',
-    nivelConsciencia: '',
-    pecadoCapital: '',
-    metodologia: '',
-    plataforma: '',
-    duracao: '30',
-    densidade: 'informativo',
-    urlFinal: '',
-    modeloIA: 'gpt-4-turbo-preview'
-  });
+const BLOCK_ICONS = {
+  [FORM_BLOCKS.DADOS_NEGOCIO]: Briefcase,
+  [FORM_BLOCKS.PUBLICO_ALVO]: Target,
+  [FORM_BLOCKS.OFERTA]: Zap,
+  [FORM_BLOCKS.ESTRATEGIA_VENDA]: Layout,
+  [FORM_BLOCKS.CONFIGURACOES_COPY]: Cpu
+};
 
-  // Atualiza o formulário quando dados de template são recebidos
+export default function CopyForm({ onSubmit, loading = false, prefilledData = null, templateManager = null, onSaveAsTemplate = null }) {
+  // Inicializar formData vazio com todos os campos do schema
+  const initializeFormData = () => {
+    const data = {};
+    BASE_FIELDS.forEach(field => {
+      // Para campos select, usar string vazia; para outros, string vazia ou valor padrão
+      if (field.defaultValue !== undefined) {
+        data[field.id] = field.defaultValue;
+      } else if (field.tipo === 'select' || field.tipo === 'multiselect') {
+        data[field.id] = '';
+      } else {
+        data[field.id] = '';
+      }
+    });
+    return data;
+  };
+
+  const [formData, setFormData] = useState(() => initializeFormData());
+  const [errors, setErrors] = useState({});
+  const [showCreateTemplateModal, setShowCreateTemplateModal] = useState(false);
+
+  // Atualizar o formulário quando dados de template são recebidos
   useEffect(() => {
     if (prefilledData) {
       setFormData(prev => ({
+        ...initializeFormData(),
         ...prev,
         ...prefilledData
       }));
+      setErrors({});
     }
   }, [prefilledData]);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+  // Atualizar quando templateManager muda
+  useEffect(() => {
+    if (templateManager && prefilledData) {
+      // Reaplicar template se necessário
+      const newFormData = { ...initializeFormData(), ...prefilledData };
+      setFormData(newFormData);
+    }
+  }, [templateManager?.systemTemplateId, templateManager?.userTemplate]);
+
+  const handleFieldChange = (fieldId, value) => {
     setFormData(prev => ({ 
       ...prev, 
-      [name]: type === 'checkbox' ? checked : value 
+      [fieldId]: value 
     }));
+    // Limpar erro do campo quando o usuário começar a digitar
+    if (errors[fieldId]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[fieldId];
+        return newErrors;
+      });
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Validar campos obrigatórios
+    BASE_FIELDS.forEach(field => {
+      const isVisible = templateManager ? templateManager.isFieldVisible(field.id) : true;
+      const isRequired = templateManager ? templateManager.isFieldRequired(field.id) : false;
+      
+      if (isVisible && isRequired) {
+        const value = formData[field.id];
+        if (!value || (typeof value === 'string' && value.trim() === '')) {
+          newErrors[field.id] = `${getFieldById(field.id)?.label || field.id} é obrigatório`;
+        }
+      }
+    });
+    
+    // Validar campos extras
+    if (templateManager) {
+      const extraFields = templateManager.getExtraFields();
+      extraFields.forEach(field => {
+        if (field.visivel && field.obrigatorio) {
+          const value = formData[field.id];
+          if (!value || (typeof value === 'string' && value.trim() === '')) {
+            newErrors[field.id] = `${field.label} é obrigatório`;
+          }
+        }
+      });
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    
+    if (!validateForm()) {
+      alert('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+    
+    // Converter dados para formato legado se necessário
+    const legacyData = adaptFormDataToLegacy(formData);
+    onSubmit(legacyData);
   };
 
-  const isVideo = formData.plataforma.includes('video') || formData.plataforma === 'instagram-reels';
-  const isImage = formData.plataforma === 'meta-ads-imagem' || formData.plataforma === 'google-ads-display';
+  const handleClearTemplate = () => {
+    if (templateManager) {
+      templateManager.clearTemplates();
+    }
+    setFormData(initializeFormData());
+    setErrors({});
+  };
 
   const inputGroupStyle = "glass-card p-6 space-y-4 border-white/5 hover:border-primary/20 transition-colors";
-  const labelStyle = "flex items-center gap-2 text-sm font-medium text-text-secondary mb-2";
+
+  // Obter blocos visíveis
+  const getVisibleBlocks = () => {
+    const blocks = Object.values(FORM_BLOCKS);
+    if (!templateManager) return blocks;
+    
+    // Filtrar blocos que têm pelo menos um campo visível
+    return blocks.filter(block => {
+      const fields = getFieldsByBlock(block);
+      return fields.some(field => templateManager.isFieldVisible(field.id));
+    });
+  };
+
+  // Obter campos visíveis de um bloco
+  const getVisibleFieldsInBlock = (blockId) => {
+    const fields = getFieldsByBlock(blockId);
+    const extraFields = templateManager ? templateManager.getExtraFields().filter(f => f.bloco === blockId) : [];
+    
+    // Filtrar campos visíveis
+    const visibleFields = fields.filter(field => {
+      if (!templateManager) return true;
+      return templateManager.isFieldVisible(field.id);
+    });
+    
+    // Adicionar campos extras visíveis
+    const visibleExtraFields = extraFields.filter(extraField => extraField.visivel);
+    
+    return [...visibleFields, ...visibleExtraFields];
+  };
+
+  // Renderizar bloco de campos
+  const renderBlock = (blockId) => {
+    const allFields = getVisibleFieldsInBlock(blockId);
+    
+    if (allFields.length === 0) return null;
+    
+    const BlockIcon = BLOCK_ICONS[blockId];
+    const blockLabel = BLOCK_LABELS[blockId];
+    
+    return (
+      <div key={blockId} className={inputGroupStyle}>
+        <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
+          {BlockIcon && <BlockIcon className="text-primary" size={20} />}
+          {blockLabel}
+        </h3>
+        
+        <div className="space-y-4">
+          {allFields.map(field => {
+            const fieldConfig = getFieldById(field.id) || field;
+            const isRequired = templateManager ? templateManager.isFieldRequired(field.id) : false;
+            const isLocked = templateManager ? templateManager.isFieldLocked(field.id) : false;
+            const fieldError = errors[field.id];
+            
+            return (
+              <div key={field.id}>
+                <DynamicFormField
+                  field={fieldConfig}
+                  value={formData[field.id]}
+                  onChange={handleFieldChange}
+                  required={isRequired}
+                  locked={isLocked}
+                  templateManager={templateManager}
+                />
+                {fieldError && (
+                  <div className="flex items-center gap-1 mt-1 text-xs text-red-400">
+                    <AlertCircle size={12} />
+                    <span>{fieldError}</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const visibleBlocks = getVisibleBlocks();
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 pb-10">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Coluna 1: Dados do Negócio */}
-        <div className="space-y-6">
-          <div className={inputGroupStyle}>
-            <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
-              <Briefcase className="text-primary" size={20} />
-              Dados do Negócio
-            </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className={labelStyle}><User size={16} /> Profissional</label>
-                <input
-                  type="text"
-                  name="nomeProfissional"
-                  value={formData.nomeProfissional}
-                  onChange={handleChange}
-                  required
-                  className="dashboard-input w-full"
-                  placeholder="Ex: Dr. João Silva"
-                />
+    <div className="space-y-8 pb-10">
+      {/* Informações do Template Ativo */}
+      {(templateManager?.systemTemplateId || templateManager?.userTemplate) && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-card p-4 border border-primary/30 bg-primary/5"
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles size={16} className="text-primary" />
+                <h3 className="text-sm font-bold text-white">Template Ativo</h3>
               </div>
-              <div>
-                <label className={labelStyle}><Clock size={16} /> Experiência (anos)</label>
-                <input
-                  type="number"
-                  name="anosExperiencia"
-                  value={formData.anosExperiencia}
-                  onChange={handleChange}
-                  required
-                  className="dashboard-input w-full"
-                  placeholder="Ex: 15"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className={labelStyle}><Target size={16} /> Resultados</label>
-              <input
-                type="text"
-                name="resultadosComprovados"
-                value={formData.resultadosComprovados}
-                onChange={handleChange}
-                required
-                className="dashboard-input w-full"
-                placeholder="Ex: 400+ pacientes curados"
-              />
-            </div>
-
-            <div>
-              <label className={labelStyle}><Zap size={16} /> Diferencial</label>
-              <textarea
-                name="diferencialCompetitivo"
-                value={formData.diferencialCompetitivo}
-                onChange={handleChange}
-                required
-                rows="2"
-                className="dashboard-input w-full resize-none"
-                placeholder="Seu protocolo exclusivo..."
-              />
-            </div>
-
-            <div>
-              <label className={labelStyle}><User size={16} /> Público-alvo</label>
-              <input
-                type="text"
-                name="publicoAlvo"
-                value={formData.publicoAlvo}
-                onChange={handleChange}
-                required
-                className="dashboard-input w-full"
-                placeholder="Ex: Mães com filhos APLV"
-              />
-            </div>
-          </div>
-
-          <div className={inputGroupStyle}>
-            <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
-              <Cpu className="text-primary" size={20} />
-              Inteligência Artificial
-            </h3>
-            <div>
-              <label className={labelStyle}>Modelo GPT</label>
-              <select
-                name="modeloIA"
-                value={formData.modeloIA}
-                onChange={handleChange}
-                className="dashboard-input w-full appearance-none"
-              >
-                <option value="gpt-4-turbo-preview">GPT-4 Turbo (Recomendado)</option>
-                <option value="gpt-4">GPT-4</option>
-                <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Rápido)</option>
-              </select>
+              {templateManager?.systemTemplateId && (
+                <p className="text-xs text-text-secondary mb-1">
+                  Template do Sistema: <span className="text-primary font-medium">
+                    {templateManager.systemTemplateId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </span>
+                </p>
+              )}
+              {templateManager?.userTemplate && (
+                <p className="text-xs text-text-secondary">
+                  Meu Template: <span className="text-purple-400 font-medium">{templateManager.userTemplate.nome}</span>
+                </p>
+              )}
               <p className="text-xs text-text-muted mt-2">
-                As copies serão geradas automaticamente usando IA
+                Este template já preencheu alguns campos para você. Revise e complete o que faltar.
               </p>
             </div>
+            <button
+              onClick={handleClearTemplate}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-text-secondary hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+              title="Limpar template"
+            >
+              <X size={14} />
+              Limpar
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Coluna 1: Primeiros 3 blocos */}
+          <div className="space-y-6">
+            {visibleBlocks.slice(0, 3).map(blockId => renderBlock(blockId))}
+          </div>
+
+          {/* Coluna 2: Últimos 2 blocos */}
+          <div className="space-y-6">
+            {visibleBlocks.slice(3).map(blockId => renderBlock(blockId))}
           </div>
         </div>
 
-        {/* Coluna 2: Estratégia e Formato */}
-        <div className="space-y-6">
-          <div className={inputGroupStyle}>
-            <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
-              <Target className="text-primary" size={20} />
-              Estratégia de Venda
-            </h3>
-            
-            <div className="space-y-4">
-              <div>
-                <label className={labelStyle}>Nível de Consciência</label>
-                <select
-                  name="nivelConsciencia"
-                  value={formData.nivelConsciencia}
-                  onChange={handleChange}
-                  required
-                  className="dashboard-input w-full appearance-none"
-                >
-                  <option value="">Selecione...</option>
-                  <option value="inconsciente">Inconsciente</option>
-                  <option value="consciente-problema">Consciente do Problema</option>
-                  <option value="consciente-solucao">Consciente da Solução</option>
-                  <option value="consciente-produto">Consciente do Produto</option>
-                  <option value="totalmente-consciente">Totalmente Consciente</option>
-                </select>
-              </div>
-
-              <div>
-                <label className={labelStyle}>Gatilho (Pecado Capital)</label>
-                <select
-                  name="pecadoCapital"
-                  value={formData.pecadoCapital}
-                  onChange={handleChange}
-                  required
-                  className="dashboard-input w-full appearance-none"
-                >
-                  <option value="">Selecione...</option>
-                  <option value="gula">Gula</option>
-                  <option value="avareza">Avareza</option>
-                  <option value="luxuria">Luxúria</option>
-                  <option value="inveja">Inveja</option>
-                  <option value="ira">Ira</option>
-                  <option value="preguica">Preguiça</option>
-                  <option value="soberba">Soberba</option>
-                </select>
-              </div>
-
-              <div>
-                <label className={labelStyle}>Metodologia Raiz</label>
-                <select
-                  name="metodologia"
-                  value={formData.metodologia}
-                  onChange={handleChange}
-                  required
-                  className="dashboard-input w-full appearance-none"
-                >
-                  <option value="">Selecione...</option>
-                  <option value="light-copy">Light Copy (Ladeira)</option>
-                  <option value="rmbc">RMBC (Georgi)</option>
-                  <option value="resposta-direta">Resposta Direta</option>
-                  <option value="5-niveis">5 Níveis (Schwartz)</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <div className={inputGroupStyle}>
-            <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
-              <Layout className="text-primary" size={20} />
-              Plataforma e Formato
-            </h3>
-            
-            <div className="space-y-4">
-              <select
-                name="plataforma"
-                value={formData.plataforma}
-                onChange={handleChange}
-                required
-                className="dashboard-input w-full appearance-none"
-              >
-                <option value="">Selecione a plataforma...</option>
-                <option value="meta-ads-video">Meta Ads - Vídeo</option>
-                <option value="meta-ads-imagem">Meta Ads - Imagem</option>
-                <option value="google-ads-pesquisa">Google Ads - Pesquisa</option>
-                <option value="instagram-reels">Instagram - Reels</option>
-              </select>
-
-              <AnimatePresence>
-                {isVideo && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                  >
-                    <label className={labelStyle}><Clock size={16} /> Duração (segundos)</label>
-                    <select name="duracao" value={formData.duracao} onChange={handleChange} className="dashboard-input w-full">
-                      <option value="15">15s</option>
-                      <option value="30">30s</option>
-                      <option value="60">60s</option>
-                    </select>
-                  </motion.div>
-                )}
-                {isImage && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                  >
-                    <label className={labelStyle}><Type size={16} /> Nível de Texto</label>
-                    <select name="densidade" value={formData.densidade} onChange={handleChange} className="dashboard-input w-full">
-                      <option value="minimalista">Minimalista</option>
-                      <option value="informativo">Informativo</option>
-                    </select>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <div>
-                <label className={labelStyle}><LinkIcon size={16} /> URL Final</label>
-                <input
-                  type="url"
-                  name="urlFinal"
-                  value={formData.urlFinal}
-                  onChange={handleChange}
-                  className="dashboard-input w-full"
-                  placeholder="https://..."
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex justify-center">
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn-primary flex items-center gap-3 px-8 py-3"
-        >
-          {loading ? (
-            <>
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-              <span>Gerando Copy...</span>
-            </>
-          ) : (
-            <>
-              <Sparkles size={20} />
-              Gerar Copy
-            </>
+        {/* Botões de Ação */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+          {onSaveAsTemplate && (
+            <button
+              type="button"
+              onClick={() => setShowCreateTemplateModal(true)}
+              disabled={loading}
+              className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white font-medium transition-colors"
+            >
+              <Save size={18} />
+              Salvar como Meu Template
+            </button>
           )}
-        </button>
-      </div>
-    </form>
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary flex items-center gap-3 px-8 py-3"
+          >
+            {loading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span>Gerando Copy...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles size={20} />
+                Gerar Copy
+              </>
+            )}
+          </button>
+        </div>
+      </form>
+
+      {/* Modal de Criar Template */}
+      {onSaveAsTemplate && (
+        <CreateTemplateModal
+          isOpen={showCreateTemplateModal}
+          onClose={() => setShowCreateTemplateModal(false)}
+          currentFormData={formData}
+          systemTemplateId={templateManager?.systemTemplateId}
+          onSubmit={(templateData) => {
+            onSaveAsTemplate(templateData);
+            setShowCreateTemplateModal(false);
+          }}
+        />
+      )}
+    </div>
   );
 }

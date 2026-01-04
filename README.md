@@ -2,7 +2,9 @@
 
 **Versão:** 6.0  
 **Data:** Janeiro 2026  
-**Objetivo:** Sistema completo para gerar copies de alta performance para Meta Ads, Google Ads e Instagram Reels, seguindo metodologias de elite e gatilhos psicológicos profundos.
+**Stack:** React + Vite + Tailwind CSS + Supabase
+
+Sistema completo para gerar copies de alta performance para Meta Ads, Google Ads e Instagram Reels, seguindo metodologias de elite e gatilhos psicológicos profundos.
 
 ---
 
@@ -12,17 +14,18 @@ O Nous.Copy é uma aplicação web que combina as metodologias de grandes mestre
 
 ### Características Principais
 
-- ✅ **Validação Completa de Parâmetros**: Garante que todos os dados necessários sejam fornecidos
-- ✅ **Análise Estratégica Automática**: Identifica pontos de dor e premissas lógicas
-- ✅ **Geração Inteligente**: Cria ganchos, corpos e CTAs coesos e poderosos
-- ✅ **Otimização Técnica**: Ajusta automaticamente para durações e limites de caracteres
-- ✅ **Múltiplos Formatos**: Suporta vídeo, imagem e Google Ads
-- ✅ **Sistema A/B**: Gera variações para testes
+- ✅ **Sistema de Templates**: Templates do sistema e templates personalizados do usuário
+- ✅ **Formulário Dinâmico**: Renderização dinâmica baseada em templates
+- ✅ **Integração OpenAI**: Geração de copies com Inteligência Artificial
+- ✅ **Validação Completa**: Garante que todos os campos obrigatórios sejam preenchidos
+- ✅ **Análise Estratégica**: Identifica pontos de dor e premissas lógicas
+- ✅ **Múltiplos Formatos**: Suporta VSL, anúncios Meta Ads, sequências de e-mails
 - ✅ **Interface Moderna**: Design responsivo e intuitivo
+- ✅ **Autenticação**: Sistema de login com Supabase
 
 ---
 
-## 🚀 Como Usar
+## 🚀 Início Rápido
 
 ### 1. Instalação
 
@@ -30,7 +33,59 @@ O Nous.Copy é uma aplicação web que combina as metodologias de grandes mestre
 npm install
 ```
 
-### 2. Iniciar o Servidor de Desenvolvimento
+### 2. Configuração de Variáveis de Ambiente
+
+Crie um arquivo `.env` na raiz do projeto:
+
+```env
+# Supabase Configuration
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_ANON_KEY=sua_chave_anon_aqui
+
+# OpenAI Configuration (Opcional)
+VITE_OPENAI_API_KEY=sua_chave_openai_aqui
+```
+
+**Para obter as credenciais do Supabase:**
+1. Acesse https://supabase.com/dashboard
+2. Selecione seu projeto
+3. Vá em **Settings** > **API**
+4. Copie a **Project URL** e a **anon public** key
+
+### 3. Criar Tabela no Supabase
+
+Execute o seguinte SQL no SQL Editor do Supabase:
+
+```sql
+CREATE TABLE user_templates (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  nome TEXT NOT NULL,
+  descricao TEXT,
+  base_template_id TEXT NOT NULL,
+  valores_predefinidos JSONB NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_user_templates_user_id ON user_templates(user_id);
+
+ALTER TABLE user_templates ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own templates"
+  ON user_templates FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own templates"
+  ON user_templates FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own templates"
+  ON user_templates FOR DELETE
+  USING (auth.uid() = user_id);
+```
+
+### 4. Iniciar o Servidor de Desenvolvimento
 
 ```bash
 npm run dev
@@ -38,7 +93,7 @@ npm run dev
 
 O projeto estará disponível em `http://localhost:5173`
 
-### 3. Build para Produção
+### 5. Build para Produção
 
 ```bash
 npm run build
@@ -46,122 +101,96 @@ npm run build
 
 Os arquivos de produção estarão na pasta `dist`.
 
-### 2. Preencher os Parâmetros
-
-#### Dados do Negócio (OBRIGATÓRIO)
-- **Nome/Especialidade do Profissional**: Ex: "Dr. João Silva - Pediatra"
-- **Anos de Experiência**: Ex: "15"
-- **Resultados Comprovados**: Ex: "400+ pacientes curados"
-- **Diferencial Competitivo**: Ex: "Protocolo exclusivo baseado em evidências"
-- **Público-alvo Principal**: Ex: "Mães com filhos com APLV"
-
-#### Nível de Consciência da Audiência (OBRIGATÓRIO)
-Selecione um dos 5 níveis:
-
-| Nível | Descrição | Abordagem |
-|-------|-----------|-----------|
-| **Inconsciente** | Não sabe que tem o problema | Educação + Despertar |
-| **Consciente do Problema** | Sabe que tem o problema, mas não a solução | Validação + Esperança |
-| **Consciente da Solução** | Sabe que existe solução, mas não a sua | Diferenciação |
-| **Consciente do Produto** | Conhece você ou seu produto | Objeção + Prova |
-| **Totalmente Consciente** | Já decidiu, só precisa do CTA | Urgência + Facilidade |
-
-#### Gatilho Psicológico - Pecado Capital (OBRIGATÓRIO)
-Selecione um dos 7 Pecados Capitais:
-
-| Pecado | Gatilho | Aplicação |
-|--------|---------|-----------|
-| **Gula** | Desejo insaciável | "Você quer mais, sempre mais" |
-| **Avareza** | Medo da perda financeira | "Quanto custa sua incerteza?" |
-| **Luxúria** | Desejo por prazer/conforto | "Imagine a vida sem essa dor" |
-| **Inveja** | Comparação social | "O que os outros fazem que você não faz?" |
-| **Ira** | Frustração/Indignação | "Você tem todo o direito de estar com raiva" |
-| **Preguiça** | Busca por atalho/facilidade | "Sem complicações, sem espera" |
-| **Soberba** | Status/Exclusividade | "Apenas os melhores conseguem" |
-
-#### Metodologia Raiz (OBRIGATÓRIO)
-Selecione uma das 4 metodologias:
-
-| Metodologia | Autor | Estrutura |
-|-------------|-------|-----------|
-| **Light Copy** | Leandro Ladeira | Premissa Lógica + Gancho Emocional + CTA |
-| **RMBC** | Stefan Georgi | Resultado + Mecanismo + Benefício + CTA |
-| **Resposta Direta** | Gary Halbert | Gancho Forte + Premissa + Prova + CTA |
-| **5 Níveis** | Eugene Schwartz | Educação Progressiva + Objeção + CTA |
-
-#### Plataforma e Formato (OBRIGATÓRIO)
-- **Meta Ads - Vídeo/Reels**: Duração 15s, 30s, 60s, 90s
-- **Meta Ads - Imagem/Estático**: Densidade Minimalista, Informativo, Carrossel
-- **Google Ads - Pesquisa**: Headline (30 caracteres) + Descrição (90 caracteres)
-- **Google Ads - Vídeo**: Duração 15s, 30s, 60s
-- **Google Ads - Display**: Imagem + Headline + Descrição
-- **Instagram - Reels**: Duração 15s, 30s, 60s
-
-#### Especificações Técnicas (CONDICIONAL)
-Dependendo do formato selecionado, você precisará informar:
-- **Vídeo**: Duração alvo (15s, 30s, 60s, 90s)
-- **Imagem**: Nível de texto (Minimalista, Informativo, Carrossel)
-- **Google Ads Pesquisa**: URL final
-
-### 3. Gerar a Copy
-
-Clique em **"Gerar Copy"** e o sistema irá:
-1. Validar todos os parâmetros
-2. Realizar análise estratégica
-3. Gerar gancho, corpo e CTA
-4. Otimizar para o formato selecionado
-5. Exibir o resultado formatado
-
-### 4. Funcionalidades Adicionais
-
-- **Gerar Variações A/B**: Cria variações com diferentes Pecados Capitais
-- **Copiar Copy**: Copia o texto para a área de transferência
-- **Exportar PDF**: Imprime ou salva como PDF
-
 ---
 
 ## 📁 Estrutura do Projeto
 
 ```
 Nous.Copy/
-│
-├── index.html          # Interface principal
-├── styles.css          # Estilos e design
-├── script.js           # Lógica de geração de copies
-└── README.md           # Documentação
+├── src/
+│   ├── components/          # Componentes React
+│   │   ├── pages/          # Páginas da aplicação
+│   │   └── ...
+│   ├── hooks/              # Hooks customizados
+│   ├── services/           # Serviços (Supabase, OpenAI)
+│   ├── utils/              # Utilitários e helpers
+│   ├── App.jsx             # Componente principal
+│   ├── main.jsx            # Entry point
+│   └── index.css           # Estilos globais
+├── public/                 # Arquivos estáticos
+├── package.json
+├── vite.config.js
+└── tailwind.config.js
 ```
 
 ---
 
-## 🎯 Metodologias Implementadas
+## 🎯 Sistema de Templates
 
-### Light Copy (Leandro Ladeira)
-- Premissa Lógica clara
-- Gancho Emocional poderoso
-- CTA direto e objetivo
+### Templates do Sistema
 
-### RMBC (Stefan Georgi)
-- Resultado prometido
-- Mecanismo explicado
-- Benefício destacado
-- CTA final
+Templates pré-configurados que alteram a estrutura do formulário:
 
-### Resposta Direta (Gary Halbert)
-- Gancho forte e imediato
-- Premissa convincente
-- Prova social integrada
-- CTA urgente
+- **VSL de Alta Conversão**: Para vídeos de vendas usando metodologia RMBC
+- **Anúncio Meta Ads Direto**: Copy focada em cliques imediatos
+- **Sequência de Aquecimento (3 E-mails)**: Para preparar audiência antes de oferta
 
-### 5 Níveis (Eugene Schwartz)
-- Educação progressiva
-- Objeções tratadas
-- CTA facilitado
+### Templates do Usuário
+
+Templates personalizados que:
+- Pré-preenchem valores padrão
+- Podem travar campos para impedir edição
+- Marcam campos como obrigatórios
+
+### Como Usar Templates
+
+1. **Usar Template do Sistema**: Vá em "Templates" → "Templates do Sistema" → Clique em "Usar Template"
+2. **Criar Meu Template**: Preencha o formulário → Clique em "Salvar como Meu Template" → Configure os campos
+3. **Usar Meu Template**: Vá em "Templates" → "Meus Templates" → Clique em "Usar"
 
 ---
 
-## 🧠 Gatilhos Psicológicos
+## 🤖 Integração OpenAI
 
-Cada Pecado Capital ativa uma emoção específica:
+O Nous.Copy possui integração opcional com OpenAI para gerar copies mais personalizadas.
+
+### Como Usar
+
+A integração é automática. Se a chave da API estiver configurada no `.env`, o sistema tentará usar a IA. Em caso de erro, usa o método padrão.
+
+### Configuração
+
+Adicione sua chave da OpenAI no arquivo `.env`:
+
+```env
+VITE_OPENAI_API_KEY=sk-...
+```
+
+⚠️ **Nota**: Para produção, considere criar um backend proxy para proteger sua chave da API.
+
+---
+
+## 🔧 Configuração do Supabase
+
+### Atualizar Credenciais
+
+1. Obtenha as novas credenciais no painel do Supabase
+2. Atualize o arquivo `.env`
+3. (Opcional) Atualize os valores padrão em `src/services/supabaseClient.js`
+4. Reinicie o servidor
+
+---
+
+## 📊 Metodologias Implementadas
+
+- **Light Copy (Leandro Ladeira)**: Premissa Lógica + Gancho Emocional + CTA
+- **RMBC (Stefan Georgi)**: Resultado + Mecanismo + Benefício + CTA
+- **Resposta Direta (Gary Halbert)**: Gancho Forte + Premissa + Prova + CTA
+- **5 Níveis (Eugene Schwartz)**: Educação Progressiva + Objeção + CTA
+
+---
+
+## 🧠 Gatilhos Psicológicos (7 Pecados Capitais)
 
 1. **Gula**: Desejo insaciável por mais
 2. **Avareza**: Medo de perder dinheiro/recursos
@@ -173,117 +202,36 @@ Cada Pecado Capital ativa uma emoção específica:
 
 ---
 
-## 📊 Formatos de Saída
+## 🐛 Troubleshooting
 
-### Vídeo (Meta Ads / Instagram Reels)
-- Roteiro completo com timing
-- Contagem de palavras
-- Estimativa de tempo de fala
-- Sugestões de ação visual
-
-### Imagem (Meta Ads / Google Ads Display)
-- Sugestão de arte
-- Headline otimizada
-- Legenda de suporte
-- CTA claro
-
-### Google Ads Pesquisa
-- Headlines (30 caracteres cada)
-- Descrição (90 caracteres)
-- URL final
-
----
-
-## ⚙️ Regras Técnicas
-
-### Vídeos
-- Velocidade de fala: 150 palavras por minuto
-- Ajuste automático para duração alvo
-- Divisão em 3 atos: Gancho | Corpo | CTA
-
-### Imagens
-- **Minimalista**: Máximo 5 palavras na arte
-- **Informativo**: Máximo 3 bullet points
-- **Carrossel**: Texto distribuído em slides
-
-### Google Ads
-- Headline: Máximo 30 caracteres
-- Descrição: Máximo 90 caracteres
-- Validação automática de limites
-
----
-
-## 🔄 Fluxo de Trabalho
-
-```
-1. Usuário preenche parâmetros
-   ↓
-2. Sistema valida todos os campos
-   ↓
-3. Análise estratégica automática
-   ↓
-4. Geração de gancho, corpo e CTA
-   ↓
-5. Otimização técnica (tempo/caracteres)
-   ↓
-6. Validação final
-   ↓
-7. Exibição do resultado formatado
+### Erro: "Cannot find module"
+```bash
+npm install
 ```
 
----
+### Erro: "Port already in use"
+```bash
+npx kill-port 5173
+```
 
-## 💡 Dicas de Uso
+### Página em branco
+1. Abra o Console do navegador (F12)
+2. Verifique se há erros
+3. Verifique se o servidor está rodando
+4. Limpe o cache do navegador (Ctrl + Shift + Delete)
 
-1. **Seja Específico**: Quanto mais detalhados os dados do negócio, melhor a copy
-2. **Teste Diferentes Pecados**: Use variações A/B para encontrar o melhor gatilho
-3. **Ajuste o Nível de Consciência**: Considere onde seu público está na jornada
-4. **Revise a Premissa**: A premissa lógica é o coração da copy
-5. **Valide o Tempo**: Para vídeos, sempre verifique se o tempo está adequado
-
----
-
-## 🎨 Personalização
-
-O sistema pode ser facilmente personalizado editando:
-
-- **Gatilhos Psicológicos**: `script.js` → `PECADOS_CAPITAIS`
-- **Metodologias**: `script.js` → `METODOLOGIAS`
-- **Estilos**: `styles.css` → Variáveis CSS
-- **Interface**: `index.html` → Estrutura HTML
-
----
-
-## 📝 Exemplo de Uso
-
-### Entrada:
-- **Profissional**: Dr. João Silva - Pediatra
-- **Experiência**: 15 anos
-- **Resultados**: 400+ pacientes curados de APLV
-- **Diferencial**: Protocolo exclusivo baseado em evidências
-- **Público**: Mães com filhos com APLV
-- **Consciência**: Consciente do Problema
-- **Pecado**: Ira
-- **Metodologia**: Light Copy
-- **Plataforma**: Meta Ads - Vídeo (30s)
-
-### Saída:
-- Roteiro completo com timing
-- Gancho ativando Ira
-- Corpo com premissa lógica e autoridade
-- CTA transformando frustração em ação
-- Contagem de palavras e tempo de fala
+### Erro ao carregar templates do usuário
+Verifique se a tabela `user_templates` foi criada no Supabase e se as políticas RLS estão configuradas corretamente.
 
 ---
 
 ## 🚧 Melhorias Futuras
 
-- [ ] Integração com API de IA para geração mais avançada
 - [ ] Histórico de copies geradas
 - [ ] Exportação em múltiplos formatos (Word, PDF, JSON)
 - [ ] Análise de performance de copies
-- [ ] Biblioteca de templates
-- [ ] Modo escuro/claro
+- [ ] Edição de templates do usuário
+- [ ] Compartilhamento de templates
 - [ ] Suporte a múltiplos idiomas
 
 ---
@@ -294,12 +242,15 @@ Este projeto é uma implementação do Meta Prompt CopyAgent Pro v6.0 para uso e
 
 ---
 
-## 👨‍💻 Desenvolvido com
+## 👨‍💻 Tecnologias Utilizadas
 
-- HTML5
-- CSS3 (Grid, Flexbox, Variáveis CSS)
-- JavaScript (ES6+)
-- Metodologias de Copywriting de Elite
+- **React 18** - Biblioteca UI
+- **Vite** - Build tool e dev server
+- **Tailwind CSS** - Framework CSS
+- **Framer Motion** - Animações
+- **Supabase** - Backend (Auth + Database)
+- **OpenAI API** - Geração de conteúdo com IA
+- **Lucide React** - Ícones
 
 ---
 

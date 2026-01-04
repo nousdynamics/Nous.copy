@@ -13,6 +13,7 @@ import Templates from './components/pages/Templates';
 import Profile from './components/pages/Profile';
 import { analiseEstrategica, gerarGancho, gerarCorpo, gerarCTA, ajustarParaDuracao } from './utils/copyGenerator';
 import { useOpenAI } from './hooks/useOpenAI';
+import { useTemplate } from './hooks/useTemplate';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -24,6 +25,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [prefilledData, setPrefilledData] = useState(null);
   const { gerarGancho: gerarGanchoIA, gerarCorpo: gerarCorpoIA, gerarCTA: gerarCTAIA } = useOpenAI();
+  const templateManager = useTemplate();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -54,8 +56,19 @@ function App() {
     setUser(null);
   };
 
-  const handleUseTemplate = (templateData) => {
-    setPrefilledData(templateData);
+  const handleUseTemplate = (templateData, isSystemTemplate = false, templateId = null, userTemplateData = null) => {
+    if (isSystemTemplate && templateId) {
+      // Aplicar template do sistema
+      const newFormData = templateManager.applySystemTemplateId(templateId, prefilledData || {});
+      setPrefilledData(newFormData);
+    } else if (userTemplateData) {
+      // Aplicar template do usuário
+      const newFormData = templateManager.applyUserTemplate(userTemplateData, prefilledData || {});
+      setPrefilledData(newFormData);
+    } else {
+      // Template simples (compatibilidade com código antigo)
+      setPrefilledData(templateData);
+    }
     setActiveTab('generator');
     setShowResult(false);
   };
@@ -133,7 +146,38 @@ function App() {
         <AnimatePresence mode="wait">
           {!showResult ? (
             <motion.div key="form" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-              <CopyForm onSubmit={handleGenerate} loading={loading} prefilledData={prefilledData} />
+              <CopyForm 
+                onSubmit={handleGenerate} 
+                loading={loading} 
+                prefilledData={prefilledData}
+                templateManager={templateManager}
+                onSaveAsTemplate={async (templateData) => {
+                  // Criar template do usuário
+                  if (!user) {
+                    alert('Você precisa estar logado para criar templates');
+                    return;
+                  }
+
+                  try {
+                    const { error } = await supabase
+                      .from('user_templates')
+                      .insert([{
+                        user_id: user.id,
+                        nome: templateData.nome,
+                        descricao: templateData.descricao,
+                        base_template_id: templateData.base_template_id,
+                        valores_predefinidos: templateData.valores_predefinidos
+                      }]);
+                    
+                    if (error) throw error;
+                    
+                    alert('Template criado com sucesso!');
+                  } catch (error) {
+                    console.error('Erro ao criar template:', error);
+                    alert('Erro ao criar template. Verifique se a tabela user_templates existe no Supabase.');
+                  }
+                }}
+              />
             </motion.div>
           ) : (
             <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }} className="space-y-6">
@@ -143,7 +187,7 @@ function App() {
           )}
         </AnimatePresence>
       );
-      case 'templates': return <Templates onUseTemplate={handleUseTemplate} />;
+      case 'templates': return <Templates onUseTemplate={handleUseTemplate} user={user} templateManager={templateManager} />;
       case 'profile': return <Profile user={user} />;
       default: return <Dashboard user={user} />;
     }
