@@ -131,17 +131,24 @@ export async function generateWithOpenAI({ prompt, model = "gpt-4.1", instructio
 export async function gerarGanchoComIA(dados, estrategia) {
   const instructions = "Você é um copywriter de elite especializado em criar ganchos (hooks) poderosos que capturam atenção imediata e ativam gatilhos psicológicos. Seja específico, criativo e emocional.";
   
+  // Verificações de segurança para evitar erros quando estratégia não está completa
+  const pecadoNome = estrategia?.pecado?.nome || 'persuasão';
+  const pecadoGatilho = estrategia?.pecado?.gatilho || 'curiosidade e desejo';
+  const nivelNome = estrategia?.nivel?.nome || 'consciente do problema';
+  const nivelAbordagem = estrategia?.nivel?.abordagem || 'focar na solução';
+  const premissa = estrategia?.premissa || 'A solução existe e está ao seu alcance';
+  
   const prompt = `Gere um GANCHO poderoso que:
 - Capture a atenção em 3 segundos (máximo 15 palavras)
-- Ative o gatilho psicológico: ${estrategia.pecado.nome} (${estrategia.pecado.gatilho})
+- Ative o gatilho psicológico: ${pecadoNome} (${pecadoGatilho})
 - Seja específico e não genérico
 - Crie curiosidade ou validação emocional
 
 Contexto:
-- Profissional: ${dados.nomeProfissional}
-- Público-alvo: ${dados.publicoAlvo}
-- Nível de consciência: ${estrategia.nivel.nome} - ${estrategia.nivel.abordagem}
-- Premissa lógica: ${estrategia.premissa}
+- Profissional: ${dados.nomeProfissional || dados.profissional_nome || 'Profissional'}
+- Público-alvo: ${dados.publicoAlvo || dados.publico_descricao || 'público-alvo'}
+- Nível de consciência: ${nivelNome} - ${nivelAbordagem}
+- Premissa lógica: ${premissa}
 
 Gere APENAS o gancho, sem explicações adicionais.`;
 
@@ -159,18 +166,23 @@ Gere APENAS o gancho, sem explicações adicionais.`;
 export async function gerarCorpoComIA(dados, estrategia, gancho) {
   const instructions = "Você é um copywriter de elite especializado em criar corpos de copy persuasivos que desenvolvem argumentos convincentes, estabelecem autoridade e criam urgência emocional.";
   
+  // Verificações de segurança para evitar erros quando estratégia não está completa
+  const premissa = estrategia?.premissa || 'A solução existe e está ao seu alcance';
+  const nivelNome = estrategia?.nivel?.nome || 'consciente do problema';
+  const pecadoNome = estrategia?.pecado?.nome || 'persuasão';
+  
   const prompt = `Gere o CORPO de uma copy que:
 - Inicie com uma frase de TRANSIÇÃO conectando ao gancho: "${gancho}"
-- Desenvolva a Premissa Lógica: ${estrategia.premissa}
-- Integre a Autoridade do Especialista: ${dados.anosExperiencia} anos de experiência, ${dados.resultadosComprovados}
-- Crie urgência ou esperança baseado no nível: ${estrategia.nivel.nome}
+- Desenvolva a Premissa Lógica: ${premissa}
+- Integre a Autoridade do Especialista: ${dados.anosExperiencia || dados.anos_experiencia || 'anos'} de experiência, ${dados.resultadosComprovados || dados.resultados_comprovados || 'resultados comprovados'}
+- Crie urgência ou esperança baseado no nível: ${nivelNome}
 
 Contexto:
-- Profissional: ${dados.nomeProfissional}
-- Diferencial: ${dados.diferencialCompetitivo}
-- Público-alvo: ${dados.publicoAlvo}
-- Pecado Capital: ${estrategia.pecado.nome}
-- Metodologia: ${dados.metodologia}
+- Profissional: ${dados.nomeProfissional || dados.profissional_nome || 'Profissional'}
+- Diferencial: ${dados.diferencialCompetitivo || dados.diferencial_competitivo || 'diferencial competitivo'}
+- Público-alvo: ${dados.publicoAlvo || dados.publico_descricao || 'público-alvo'}
+- Pecado Capital: ${pecadoNome}
+- Metodologia: ${dados.metodologia || dados.metodologia_base || 'metodologia comprovada'}
 
 Gere APENAS o corpo, sem explicações adicionais.`;
 
@@ -187,16 +199,20 @@ Gere APENAS o corpo, sem explicações adicionais.`;
 export async function gerarCTAComIA(dados, estrategia) {
   const instructions = "Você é um copywriter de elite especializado em criar CTAs (Chamadas para Ação) claras, diretas e persuasivas que geram conversão.";
   
+  // Verificações de segurança para evitar erros quando estratégia não está completa
+  const pecadoNome = estrategia?.pecado?.nome || 'persuasão';
+  const nivelNome = estrategia?.nivel?.nome || 'consciente do problema';
+  
   const prompt = `Gere um CTA (Chamada para Ação) que:
 - Seja CLARO e DIRETO (máximo 2 frases)
 - Crie urgência ou esperança
 - Facilite a ação (não complique)
 - Reforce o benefício final
-- Ative o gatilho: ${estrategia.pecado.nome}
+- Ative o gatilho: ${pecadoNome}
 
 Contexto:
-- Nível de consciência: ${estrategia.nivel.nome}
-- Plataforma: ${dados.plataforma}
+- Nível de consciência: ${nivelNome}
+- Plataforma: ${dados.plataforma || dados.canal_principal || 'plataforma digital'}
 
 Gere APENAS o CTA, sem explicações adicionais.`;
 

@@ -94,9 +94,24 @@ function App() {
           throw error;
         }
         
+        // Criar estratégia mínima válida para estrutura invisível
+        const estrategiaInvisivel = {
+          tipo: 'estrutura_invisivel',
+          pontoDor: '',
+          premissa: 'Análise e adaptação da estrutura do concorrente',
+          pecado: {
+            nome: 'Persuasão Estratégica',
+            gatilho: 'Estrutura comprovada adaptada para seu negócio'
+          },
+          nivel: {
+            nome: 'Consciente da Oportunidade',
+            abordagem: 'Aplicar estrutura testada e validada'
+          }
+        };
+        
         const copyResult = {
           dados: formData,
-          estrategia: { tipo: 'estrutura_invisivel', pontoDor: '', premissa: '', pecado: {}, nivel: {} },
+          estrategia: estrategiaInvisivel,
           gancho: result.gancho,
           corpo: result.corpo,
           cta: result.cta,
