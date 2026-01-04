@@ -8,6 +8,16 @@
     background-image: radial-gradient(circle at 50% -20%, rgba(253, 125, 2, 0.15), transparent),
                       radial-gradient(circle at 0% 100%, rgba(196, 11, 0, 0.05), transparent);
   }
+
+  /* Garante que o texto digitado em inputs e selects seja visível */
+  input, select, textarea {
+    @apply text-white !important;
+  }
+
+  /* Estilo para as opções do select para garantir visibilidade no Chrome/Vercel */
+  select option {
+    @apply bg-dashboard-bg text-white;
+  }
 }
 
 @layer components {

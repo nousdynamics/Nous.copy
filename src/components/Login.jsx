@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../services/supabaseClient';
-import Logo from './Logo';
 
 export default function Login({ onLoginSuccess }) {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -15,9 +15,14 @@ export default function Login({ onLoginSuccess }) {
     setLoading(true);
     setError(null);
 
+    if (isSignUp && password !== confirmPassword) {
+      setError('As senhas não coincidem');
+      setLoading(false);
+      return;
+    }
+
     try {
       if (isSignUp) {
-        // Cadastro
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
@@ -26,11 +31,9 @@ export default function Login({ onLoginSuccess }) {
         if (signUpError) throw signUpError;
 
         if (data.user) {
-          // Usuário criado com sucesso
           onLoginSuccess(data.user);
         }
       } else {
-        // Login
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
@@ -51,15 +54,14 @@ export default function Login({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-bg-darker">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-dashboard-bg">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="bg-bg-card rounded-3xl p-8 shadow-2xl border border-border">
-          {/* Logo/Título */}
+        <div className="glass-card p-8 shadow-2xl border border-white/10">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -67,19 +69,18 @@ export default function Login({ onLoginSuccess }) {
             className="text-center mb-8"
           >
             <div className="flex items-center justify-center gap-4 mb-4">
-            <img
-            src="assets/LOGO NOUS COPY COMPLETA.png"
-            alt="Nous Copy Logo"
-            className="h-16 w-auto"
-            />
+              <img
+                src="assets/LOGO NOUS COPY COMPLETA.png"
+                alt="Nous Copy Logo"
+                className="h-16 w-auto"
+              />
             </div>
             <p className="text-text-secondary text-sm">
               Gerador de Copies de Elite
             </p>
           </motion.div>
 
-          {/* Tabs Login/Cadastro */}
-          <div className="flex gap-2 mb-6 bg-bg-input p-1 rounded-xl">
+          <div className="flex gap-2 mb-6 bg-white/5 p-1 rounded-xl">
             <button
               type="button"
               onClick={() => {
@@ -88,7 +89,7 @@ export default function Login({ onLoginSuccess }) {
               }}
               className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all ${
                 !isSignUp
-                  ? 'bg-gradient-radial text-white shadow-lg'
+                  ? 'bg-primary text-white shadow-lg'
                   : 'text-text-muted hover:text-text-secondary'
               }`}
             >
@@ -110,7 +111,6 @@ export default function Login({ onLoginSuccess }) {
             </button>
           </div>
 
-          {/* Formulário */}
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <motion.div
@@ -131,7 +131,7 @@ export default function Login({ onLoginSuccess }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-bg-input border-2 border-border rounded-xl text-text-primary focus:outline-none focus:border-primary transition-colors"
+                className="dashboard-input w-full"
                 placeholder="seu@email.com"
                 disabled={loading}
               />
@@ -147,25 +147,43 @@ export default function Login({ onLoginSuccess }) {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 bg-bg-input border-2 border-border rounded-xl text-text-primary focus:outline-none focus:border-primary transition-colors"
+                className="dashboard-input w-full"
                 placeholder="••••••••"
                 disabled={loading}
               />
             </div>
+
+            {isSignUp && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+              >
+                <label className="block text-text-secondary text-sm font-medium mb-2">
+                  Confirmar Senha
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={6}
+                  className="dashboard-input w-full"
+                  placeholder="••••••••"
+                  disabled={loading}
+                />
+              </motion.div>
+            )}
 
             <motion.button
               type="submit"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               disabled={loading}
-              className="w-full py-3.5 px-6 bg-gradient-radial text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary w-full py-3.5"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   {isSignUp ? 'Criando conta...' : 'Entrando...'}
                 </span>
               ) : (
@@ -181,7 +199,6 @@ export default function Login({ onLoginSuccess }) {
           )}
         </div>
 
-        {/* Footer */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
