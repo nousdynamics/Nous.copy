@@ -1,5 +1,7 @@
 import { PECADOS_CAPITAIS, NIVEL_CONSCIENCIA, VELOCIDADE_FALA } from './constants';
 
+export { VELOCIDADE_FALA };
+
 // Análise estratégica
 export function analiseEstrategica(dados) {
   const pecado = PECADOS_CAPITAIS[dados.pecadoCapital];
