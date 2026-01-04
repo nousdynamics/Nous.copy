@@ -1,72 +1,40 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   User, 
   Mail, 
-  Calendar,
-  History,
-  Settings,
+  Shield, 
+  Bell, 
+  Zap,
+  CheckCircle2,
+  Camera,
   Save,
-  Copy,
-  Trash2,
-  Eye
+  History as HistoryIcon
 } from 'lucide-react';
-import { supabase } from '../../services/supabaseClient';
+import History from './History';
 
 export default function Profile({ user }) {
   const [activeSection, setActiveSection] = useState('profile');
-  const [profileData, setProfileData] = useState({
-    name: user?.email?.split('@')[0] || '',
-    email: user?.email || '',
-    createdAt: user?.created_at || ''
+  const [notifications, setNotifications] = useState({
+    email: true,
+    browser: false,
+    marketing: true
   });
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (activeSection === 'history') {
-      loadHistory();
-    }
-  }, [activeSection]);
-
-  const loadHistory = async () => {
-    setLoading(true);
-    try {
-      // Aqui você pode buscar o histórico do Supabase
-      // Por enquanto, vamos simular dados vazios
-      setHistory([]);
-    } catch (error) {
-      console.error('Erro ao carregar histórico:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSaveProfile = async () => {
-    setLoading(true);
-    try {
-      // Aqui você pode salvar os dados do perfil no Supabase
-      alert('Perfil atualizado com sucesso!');
-    } catch (error) {
-      console.error('Erro ao salvar perfil:', error);
-      alert('Erro ao atualizar perfil');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const cardStyle = "glass-card p-8 border-white/5";
+  const sectionTitle = "text-lg font-bold text-white mb-6 flex items-center gap-2";
 
   return (
     <div className="space-y-8 pb-10">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
       >
-        <h2 className="text-2xl font-bold text-white mb-2">Perfil</h2>
-        <p className="text-text-secondary">Gerencie suas informações e histórico</p>
+        <h2 className="text-3xl font-bold text-white mb-2">Minha Conta</h2>
+        <p className="text-text-secondary">Gerencie suas informações, preferências e histórico.</p>
       </motion.div>
 
-      {/* Tabs */}
+      {/* Tabs Internas do Perfil */}
       <div className="flex gap-4 border-b border-white/10">
         <button
           onClick={() => setActiveSection('profile')}
@@ -78,7 +46,7 @@ export default function Profile({ user }) {
         >
           <div className="flex items-center gap-2">
             <User size={18} />
-            Perfil
+            Perfil & Configurações
           </div>
         </button>
         <button
@@ -90,153 +58,136 @@ export default function Profile({ user }) {
           }`}
         >
           <div className="flex items-center gap-2">
-            <History size={18} />
-            Histórico
+            <HistoryIcon size={18} />
+            Histórico de Copies
           </div>
         </button>
       </div>
 
-      {/* Conteúdo das Tabs */}
       <motion.div
         key={activeSection}
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 0.3 }}
       >
-        {activeSection === 'profile' && (
-          <div className="glass-card p-8 max-w-2xl">
-            <div className="flex items-center gap-6 mb-8">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white text-2xl font-bold">
-                {user?.email?.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white mb-1">
-                  {profileData.name}
+        {activeSection === 'profile' ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Coluna Esquerda: Info Básica */}
+            <div className="lg:col-span-2 space-y-8">
+              <div className={cardStyle}>
+                <h3 className={sectionTitle}>
+                  <User className="text-primary" size={20} />
+                  Informações Pessoais
                 </h3>
-                <p className="text-text-secondary">{profileData.email}</p>
-              </div>
-            </div>
+                
+                <div className="flex flex-col md:flex-row gap-8 items-start">
+                  <div className="relative group">
+                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white text-4xl font-bold shadow-xl">
+                      {user?.email?.charAt(0).toUpperCase()}
+                    </div>
+                    <button className="absolute bottom-0 right-0 p-2 bg-dashboard-bg border border-white/10 rounded-full text-text-secondary hover:text-white transition-colors shadow-lg">
+                      <Camera size={18} />
+                    </button>
+                  </div>
 
-            <div className="space-y-6">
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-text-secondary mb-2">
-                  <User size={16} />
-                  Nome
-                </label>
-                <input
-                  type="text"
-                  value={profileData.name}
-                  onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                  className="dashboard-input w-full"
-                  placeholder="Seu nome"
-                />
-              </div>
-
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-text-secondary mb-2">
-                  <Mail size={16} />
-                  E-mail
-                </label>
-                <input
-                  type="email"
-                  value={profileData.email}
-                  disabled
-                  className="dashboard-input w-full opacity-50 cursor-not-allowed"
-                />
-                <p className="text-xs text-text-muted mt-1">
-                  O e-mail não pode ser alterado
-                </p>
-              </div>
-
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-text-secondary mb-2">
-                  <Calendar size={16} />
-                  Membro desde
-                </label>
-                <input
-                  type="text"
-                  value={profileData.createdAt ? new Date(profileData.createdAt).toLocaleDateString('pt-BR') : ''}
-                  disabled
-                  className="dashboard-input w-full opacity-50 cursor-not-allowed"
-                />
-              </div>
-
-              <div className="flex justify-end pt-4">
-                <button
-                  onClick={handleSaveProfile}
-                  disabled={loading}
-                  className="btn-primary flex items-center gap-2 px-6 py-3"
-                >
-                  <Save size={18} />
-                  {loading ? 'Salvando...' : 'Salvar Alterações'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeSection === 'history' && (
-          <div className="space-y-4">
-            {loading ? (
-              <div className="glass-card p-12 text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                <p className="text-text-secondary">Carregando histórico...</p>
-              </div>
-            ) : history.length > 0 ? (
-              history.map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  className="glass-card p-6"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-white mb-2">
-                        {item.title || 'Copy Gerada'}
-                      </h3>
-                      <p className="text-sm text-text-secondary mb-4 line-clamp-2">
-                        {item.description || 'Descrição da copy gerada...'}
-                      </p>
-                      <div className="flex items-center gap-4 text-xs text-text-muted">
-                        <div className="flex items-center gap-1">
-                          <Calendar size={14} />
-                          {new Date(item.created_at || Date.now()).toLocaleDateString('pt-BR')}
-                        </div>
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-text-muted uppercase tracking-wider">Nome de Exibição</label>
+                      <input 
+                        type="text" 
+                        defaultValue={user?.email?.split('@')[0]} 
+                        className="dashboard-input w-full"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-text-muted uppercase tracking-wider">E-mail</label>
+                      <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-text-muted cursor-not-allowed">
+                        <Mail size={16} className="mr-2" />
+                        <span className="text-sm">{user?.email}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 ml-4">
-                      <button className="p-2 rounded-lg hover:bg-white/10 transition-colors text-text-secondary hover:text-white">
-                        <Eye size={18} />
-                      </button>
-                      <button className="p-2 rounded-lg hover:bg-white/10 transition-colors text-text-secondary hover:text-white">
-                        <Copy size={18} />
-                      </button>
-                      <button className="p-2 rounded-lg hover:bg-red-500/10 transition-colors text-text-secondary hover:text-red-400">
-                        <Trash2 size={18} />
+                  </div>
+                </div>
+
+                <div className="mt-8 pt-8 border-t border-white/5 flex justify-end">
+                  <button className="btn-primary flex items-center gap-2">
+                    <Save size={18} />
+                    Salvar Alterações
+                  </button>
+                </div>
+              </div>
+
+              <div className={cardStyle}>
+                <h3 className={sectionTitle}>
+                  <Bell className="text-primary" size={20} />
+                  Notificações
+                </h3>
+                
+                <div className="space-y-6">
+                  {Object.entries(notifications).map(([key, value]) => (
+                    <div key={key} className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-bold text-white capitalize">Notificações por {key}</p>
+                        <p className="text-xs text-text-muted">Receba atualizações sobre suas copies e novidades.</p>
+                      </div>
+                      <button 
+                        onClick={() => setNotifications(prev => ({...prev, [key]: !value}))}
+                        className={`w-12 h-6 rounded-full transition-colors relative ${value ? 'bg-primary' : 'bg-white/10'}`}
+                      >
+                        <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${value ? 'translate-x-6' : ''}`}></div>
                       </button>
                     </div>
-                  </div>
-                </motion.div>
-              ))
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="glass-card p-12 text-center"
-              >
-                <History size={64} className="mx-auto mb-4 text-text-muted opacity-30" />
-                <h3 className="text-xl font-bold text-white mb-2">
-                  Nenhum histórico ainda
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Coluna Direita: Plano e Segurança */}
+            <div className="space-y-8">
+              <div className={`${cardStyle} bg-primary/5 border-primary/10`}>
+                <h3 className={sectionTitle}>
+                  <Zap className="text-primary" size={20} />
+                  Seu Plano
                 </h3>
-                <p className="text-text-secondary">
-                  Suas copies geradas aparecerão aqui
-                </p>
-              </motion.div>
-            )}
+                
+                <div className="mb-6">
+                  <span className="text-3xl font-bold text-white">Elite Pro</span>
+                  <p className="text-sm text-text-secondary mt-1">Renova em 15 de Fev, 2026</p>
+                </div>
+
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-center gap-2 text-sm text-text-secondary">
+                    <CheckCircle2 size={16} className="text-primary" />
+                    Copies Ilimitadas
+                  </li>
+                  <li className="flex items-center gap-2 text-sm text-text-secondary">
+                    <CheckCircle2 size={16} className="text-primary" />
+                    Acesso ao GPT-4
+                  </li>
+                </ul>
+
+                <button className="w-full py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all border border-white/10">
+                  Gerenciar Assinatura
+                </button>
+              </div>
+
+              <div className={cardStyle}>
+                <h3 className={sectionTitle}>
+                  <Shield className="text-primary" size={20} />
+                  Segurança
+                </h3>
+                
+                <div className="space-y-4">
+                  <button className="w-full flex items-center justify-between p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-all group">
+                    <span className="text-sm text-text-secondary group-hover:text-white">Alterar Senha</span>
+                    <Shield size={16} className="text-text-muted" />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
+        ) : (
+          <History />
         )}
       </motion.div>
     </div>

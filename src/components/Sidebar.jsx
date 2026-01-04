@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
-  History, 
   LogOut,
   Sparkles,
   Layers,
@@ -13,7 +12,6 @@ export default function Sidebar({ user, onLogout, activeTab = 'dashboard', onTab
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'generator', icon: Sparkles, label: 'Gerador' },
     { id: 'templates', icon: Layers, label: 'Templates' },
-    { id: 'history', icon: History, label: 'Histórico' },
   ];
 
   return (

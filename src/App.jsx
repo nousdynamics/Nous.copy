@@ -11,7 +11,6 @@ import Footer from './components/Footer';
 import Dashboard from './components/pages/Dashboard';
 import Templates from './components/pages/Templates';
 import Profile from './components/pages/Profile';
-import History from './components/pages/History';
 import { analiseEstrategica, gerarGancho, gerarCorpo, gerarCTA, ajustarParaDuracao } from './utils/copyGenerator';
 import { useOpenAI } from './hooks/useOpenAI';
 
@@ -23,6 +22,7 @@ function App() {
   const [showVariations, setShowVariations] = useState(false);
   const [copyData, setCopyData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [prefilledData, setPrefilledData] = useState(null);
   const { gerarGancho: gerarGanchoIA, gerarCorpo: gerarCorpoIA, gerarCTA: gerarCTAIA } = useOpenAI();
 
   useEffect(() => {
@@ -52,6 +52,12 @@ function App() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
+  };
+
+  const handleUseTemplate = (templateData) => {
+    setPrefilledData(templateData);
+    setActiveTab('generator');
+    setShowResult(false);
   };
 
   const handleGenerate = async (formData) => {
@@ -93,6 +99,7 @@ function App() {
       
       setShowResult(true);
       setShowVariations(false);
+      setPrefilledData(null); // Limpa dados pré-preenchidos após gerar
     } catch (error) {
       console.error('Erro ao gerar copy:', error);
       alert('Erro ao gerar copy. Tente novamente.');
@@ -126,7 +133,7 @@ function App() {
         <AnimatePresence mode="wait">
           {!showResult ? (
             <motion.div key="form" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-              <CopyForm onSubmit={handleGenerate} loading={loading} />
+              <CopyForm onSubmit={handleGenerate} loading={loading} prefilledData={prefilledData} />
             </motion.div>
           ) : (
             <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }} className="space-y-6">
@@ -136,8 +143,7 @@ function App() {
           )}
         </AnimatePresence>
       );
-      case 'templates': return <Templates />;
-      case 'history': return <History />;
+      case 'templates': return <Templates onUseTemplate={handleUseTemplate} />;
       case 'profile': return <Profile user={user} />;
       default: return <Dashboard user={user} />;
     }

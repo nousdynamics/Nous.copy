@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, 
@@ -13,7 +13,7 @@ import {
   Sparkles
 } from 'lucide-react';
 
-export default function CopyForm({ onSubmit, loading = false }) {
+export default function CopyForm({ onSubmit, loading = false, prefilledData = null }) {
   const [formData, setFormData] = useState({
     nomeProfissional: '',
     anosExperiencia: '',
@@ -29,6 +29,16 @@ export default function CopyForm({ onSubmit, loading = false }) {
     urlFinal: '',
     modeloIA: 'gpt-4-turbo-preview'
   });
+
+  // Atualiza o formulário quando dados de template são recebidos
+  useEffect(() => {
+    if (prefilledData) {
+      setFormData(prev => ({
+        ...prev,
+        ...prefilledData
+      }));
+    }
+  }, [prefilledData]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

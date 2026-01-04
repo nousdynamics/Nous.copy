@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Layers, 
   Plus, 
@@ -11,12 +11,14 @@ import {
   Video,
   Image as ImageIcon,
   MousePointer2,
-  Filter
+  Filter,
+  X
 } from 'lucide-react';
 
-export default function Templates() {
+export default function Templates({ onUseTemplate }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('Todos');
+  const [showCreateModal, setShowCreateModal] = useState(false);
   
   const categories = ['Todos', 'Vendas', 'Anúncios', 'Vídeo', 'Social Media', 'E-mail'];
 
@@ -28,7 +30,8 @@ export default function Templates() {
       category: 'Vídeo',
       created: '2024-01-15',
       icon: Video,
-      color: 'text-blue-400'
+      color: 'text-blue-400',
+      prefill: { nicho: 'Infoprodutos', publico: 'Empreendedores', dor: 'Falta de vendas', plataforma: 'YouTube' }
     },
     {
       id: 2,
@@ -37,7 +40,8 @@ export default function Templates() {
       category: 'Anúncios',
       created: '2024-01-10',
       icon: MousePointer2,
-      color: 'text-emerald-400'
+      color: 'text-emerald-400',
+      prefill: { nicho: 'E-commerce', publico: 'Compradores impulsivos', dor: 'Desejo de consumo', plataforma: 'Facebook/Instagram' }
     },
     {
       id: 3,
@@ -46,34 +50,8 @@ export default function Templates() {
       category: 'E-mail',
       created: '2024-01-05',
       icon: FileText,
-      color: 'text-amber-400'
-    },
-    {
-      id: 4,
-      name: 'Reels Viral (Hook Forte)',
-      description: 'Roteiro curto com foco total nos primeiros 3 segundos.',
-      category: 'Social Media',
-      created: '2024-01-02',
-      icon: Sparkles,
-      color: 'text-purple-400'
-    },
-    {
-      id: 5,
-      name: 'Página de Vendas (Long Form)',
-      description: 'Estrutura de 5 níveis de consciência para páginas complexas.',
-      category: 'Vendas',
-      created: '2023-12-28',
-      icon: Layers,
-      color: 'text-pink-400'
-    },
-    {
-      id: 6,
-      name: 'Criativo de Imagem (Minimalista)',
-      description: 'Headline e legenda curta para anúncios estáticos de alta performance.',
-      category: 'Anúncios',
-      created: '2023-12-20',
-      icon: ImageIcon,
-      color: 'text-indigo-400'
+      color: 'text-amber-400',
+      prefill: { nicho: 'Serviços', publico: 'Leads frios', dor: 'Desconfiança', plataforma: 'E-mail Marketing' }
     }
   ];
 
@@ -96,7 +74,10 @@ export default function Templates() {
           <h2 className="text-3xl font-bold text-white mb-2">Templates de Elite</h2>
           <p className="text-text-secondary">Escolha uma estrutura validada para começar sua copy.</p>
         </div>
-        <button className="btn-primary flex items-center gap-2 px-6 py-3">
+        <button 
+          onClick={() => setShowCreateModal(true)}
+          className="btn-primary flex items-center gap-2 px-6 py-3"
+        >
           <Plus size={20} />
           Criar Template
         </button>
@@ -142,74 +123,90 @@ export default function Templates() {
       </div>
 
       {/* Grid de Templates */}
-      {filteredTemplates.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTemplates.map((template, index) => (
-            <motion.div
-              key={template.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.05 }}
-              whileHover={{ y: -5 }}
-              className="glass-card p-6 hover:border-primary/30 transition-all cursor-pointer group relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 p-4">
-                <button className="p-2 rounded-lg hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100">
-                  <MoreVertical size={18} className="text-text-secondary" />
-                </button>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredTemplates.map((template, index) => (
+          <motion.div
+            key={template.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: index * 0.05 }}
+            whileHover={{ y: -5 }}
+            className="glass-card p-6 hover:border-primary/30 transition-all cursor-pointer group relative overflow-hidden"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className={`p-3 rounded-2xl bg-white/5 ${template.color}`}>
+                <template.icon size={24} />
               </div>
+              <div>
+                <h3 className="text-lg font-bold text-white group-hover:text-primary transition-colors">
+                  {template.name}
+                </h3>
+                <span className="text-xs text-text-muted">{template.category}</span>
+              </div>
+            </div>
 
-              <div className="flex items-center gap-4 mb-4">
-                <div className={`p-3 rounded-2xl bg-white/5 ${template.color}`}>
-                  <template.icon size={24} />
+            <p className="text-sm text-text-secondary mb-6 line-clamp-2 leading-relaxed">
+              {template.description}
+            </p>
+
+            <div className="flex items-center justify-between pt-4 border-t border-white/5">
+              <div className="flex items-center gap-2 text-xs text-text-muted">
+                <Calendar size={14} />
+                {new Date(template.created).toLocaleDateString('pt-BR')}
+              </div>
+              <button 
+                onClick={() => onUseTemplate(template.prefill)}
+                className="text-xs font-bold text-primary hover:underline"
+              >
+                Usar Template
+              </button>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Modal de Criação (Simulado) */}
+      <AnimatePresence>
+        {showCreateModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="glass-card w-full max-w-lg p-8 relative"
+            >
+              <button 
+                onClick={() => setShowCreateModal(false)}
+                className="absolute top-4 right-4 p-2 text-text-muted hover:text-white transition-colors"
+              >
+                <X size={20} />
+              </button>
+              
+              <h3 className="text-2xl font-bold text-white mb-6">Criar Novo Template</h3>
+              
+              <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); setShowCreateModal(false); alert('Template criado com sucesso!'); }}>
+                <div>
+                  <label className="block text-sm font-medium text-text-secondary mb-2">Nome do Template</label>
+                  <input type="text" className="dashboard-input w-full" placeholder="Ex: Copy para Lançamento" required />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white group-hover:text-primary transition-colors">
-                    {template.name}
-                  </h3>
-                  <span className="text-xs text-text-muted">{template.category}</span>
+                  <label className="block text-sm font-medium text-text-secondary mb-2">Categoria</label>
+                  <select className="dashboard-input w-full">
+                    {categories.filter(c => c !== 'Todos').map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
                 </div>
-              </div>
-
-              <p className="text-sm text-text-secondary mb-6 line-clamp-2 leading-relaxed">
-                {template.description}
-              </p>
-
-              <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                <div className="flex items-center gap-2 text-xs text-text-muted">
-                  <Calendar size={14} />
-                  {new Date(template.created).toLocaleDateString('pt-BR')}
+                <div>
+                  <label className="block text-sm font-medium text-text-secondary mb-2">Descrição</label>
+                  <textarea className="dashboard-input w-full h-24 resize-none" placeholder="Descreva o objetivo deste template..."></textarea>
                 </div>
-                <button className="text-xs font-bold text-primary hover:underline">
-                  Usar Template
+                <button type="submit" className="btn-primary w-full py-3 mt-4">
+                  Salvar Template
                 </button>
-              </div>
+              </form>
             </motion.div>
-          ))}
-        </div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="glass-card p-20 text-center"
-        >
-          <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Layers size={40} className="text-text-muted opacity-30" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">
-            Nenhum template encontrado
-          </h3>
-          <p className="text-text-secondary mb-8 max-w-md mx-auto">
-            Não encontramos nenhum template que corresponda à sua busca ou categoria selecionada.
-          </p>
-          <button 
-            onClick={() => {setSearchTerm(''); setActiveCategory('Todos');}}
-            className="text-primary font-bold hover:underline"
-          >
-            Limpar todos os filtros
-          </button>
-        </motion.div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }
