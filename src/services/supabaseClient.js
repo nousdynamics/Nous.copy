@@ -1,6 +1,44 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://tdfvkgytyaltjdlssuiy.supabase.co'
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkZnZrZ3l0eWFsdGpkbHNzdWl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3Nzk3MTcsImV4cCI6MjA4MjM1NTcxN30.TP15-jAMDb7tAr4ikQcP9AYBvB7RdvB12lZxvyCMR2E'
+// ============================================
+// CONFIGURAÇÃO DO SUPABASE
+// ============================================
+// Para atualizar as credenciais após atualização do MCP:
+// 1. Obtenha as novas credenciais no painel do Supabase (Settings > API)
+// 2. Atualize as variáveis de ambiente no arquivo .env
+// 3. Ou atualize os valores padrão abaixo (não recomendado para produção)
+// ============================================
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Valores padrão (serão substituídos pelas variáveis de ambiente se definidas)
+const DEFAULT_SUPABASE_URL = 'https://errbnfjpfqoypveyvaxj.supabase.co'
+const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_QZ0ccOermmDNDHAopDMP5A_W5kLO71G'
+
+// Obter credenciais das variáveis de ambiente ou usar valores padrão
+// Aceita tanto VITE_SUPABASE_ANON_KEY quanto VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 
+                        import.meta.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY || 
+                        DEFAULT_SUPABASE_ANON_KEY
+
+// Validação básica
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('⚠️ Erro: Credenciais do Supabase não configuradas!')
+  console.error('Configure VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY nas variáveis de ambiente.')
+}
+
+// Criar cliente Supabase
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true
+  }
+})
+
+// Log para debug (apenas em desenvolvimento)
+if (import.meta.env.DEV) {
+  console.log('✅ Cliente Supabase inicializado:', {
+    url: supabaseUrl,
+    hasKey: !!supabaseAnonKey
+  })
+}

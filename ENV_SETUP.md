@@ -6,8 +6,10 @@ Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
 
 ```env
 # Supabase Configuration
-VITE_SUPABASE_URL=https://tdfvkgytyaltjdlssuiy.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkZnZrZ3l0eWFsdGpkbHNzdWl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY3Nzk3MTcsImV4cCI6MjA4MjM1NTcxN30.TP15-jAMDb7tAr4ikQcP9AYBvB7RdvB12lZxvyCMR2E
+VITE_SUPABASE_URL=https://errbnfjpfqoypveyvaxj.supabase.co
+VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY=sb_publishable_QZ0ccOermmDNDHAopDMP5A_W5kLO71G
+# Ou use VITE_SUPABASE_ANON_KEY (ambos funcionam)
+# VITE_SUPABASE_ANON_KEY=sb_publishable_QZ0ccOermmDNDHAopDMP5A_W5kLO71G
 
 # OpenAI Configuration (Opcional)
 VITE_OPENAI_API_KEY=your_openai_api_key_here
