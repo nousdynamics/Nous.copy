@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Bell, Search, User } from 'lucide-react';
+import { Search } from 'lucide-react';
+import Notifications from './Notifications';
 
 export default function Header({ user }) {
   return (
@@ -25,14 +26,7 @@ export default function Header({ user }) {
           />
         </div>
         
-        <button className="p-3 glass-card !rounded-xl hover:bg-white/10 transition-colors relative">
-          <Bell size={20} className="text-text-secondary" />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-dashboard-bg"></span>
-        </button>
-        
-        <button className="p-3 glass-card !rounded-xl hover:bg-white/10 transition-colors">
-          <User size={20} className="text-text-secondary" />
-        </button>
+        <Notifications />
       </div>
     </header>
   );

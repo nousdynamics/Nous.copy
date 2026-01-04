@@ -39,7 +39,7 @@ export async function generateWithOpenAI({ prompt, model = "gpt-5-nano", store =
     
     // Fallback para API padrão do OpenAI
     const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo-preview", // Usar modelo disponível
+      model: model, // Usar modelo selecionado
       messages: [
         {
           role: "system",
@@ -61,7 +61,7 @@ export async function generateWithOpenAI({ prompt, model = "gpt-5-nano", store =
     // Se a API customizada falhar, tentar API padrão
     try {
       const completion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: model === "gpt-4-turbo-preview" || model === "gpt-4" ? "gpt-3.5-turbo" : model,
         messages: [
           {
             role: "system",
@@ -105,7 +105,8 @@ Contexto:
 
 Gere APENAS o gancho, sem explicações adicionais.`;
 
-  return await generateWithOpenAI({ prompt });
+  const model = dados.modeloIA || 'gpt-4-turbo-preview';
+  return await generateWithOpenAI({ prompt, model });
 }
 
 /**
@@ -131,7 +132,8 @@ Contexto:
 
 Gere APENAS o corpo, sem explicações adicionais.`;
 
-  return await generateWithOpenAI({ prompt });
+  const model = dados.modeloIA || 'gpt-4-turbo-preview';
+  return await generateWithOpenAI({ prompt, model });
 }
 
 /**
@@ -154,7 +156,8 @@ Contexto:
 
 Gere APENAS o CTA, sem explicações adicionais.`;
 
-  return await generateWithOpenAI({ prompt });
+  const model = dados.modeloIA || 'gpt-4-turbo-preview';
+  return await generateWithOpenAI({ prompt, model });
 }
 
 /**

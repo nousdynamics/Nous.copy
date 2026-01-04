@@ -2,18 +2,17 @@ import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
   FileText, 
-  History, 
   Settings, 
   LogOut,
   Sparkles,
-  Layers
+  Layers,
+  User
 } from 'lucide-react';
 
-export default function Sidebar({ user, onLogout, activeTab = 'dashboard' }) {
+export default function Sidebar({ user, onLogout, activeTab = 'dashboard', onTabChange }) {
   const menuItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'generator', icon: Sparkles, label: 'Gerador' },
-    { id: 'history', icon: History, label: 'Histórico' },
     { id: 'templates', icon: Layers, label: 'Templates' },
   ];
 
@@ -36,6 +35,7 @@ export default function Sidebar({ user, onLogout, activeTab = 'dashboard' }) {
         {menuItems.map((item) => (
           <button
             key={item.id}
+            onClick={() => onTabChange(item.id)}
             className={`sidebar-item w-full ${activeTab === item.id ? 'sidebar-item-active' : ''}`}
           >
             <item.icon size={20} />
@@ -45,6 +45,14 @@ export default function Sidebar({ user, onLogout, activeTab = 'dashboard' }) {
       </nav>
 
       <div className="mt-auto pt-6 border-t border-white/5">
+        <button
+          onClick={() => onTabChange('profile')}
+          className={`sidebar-item w-full mb-2 ${activeTab === 'profile' ? 'sidebar-item-active' : ''}`}
+        >
+          <User size={20} />
+          <span className="font-medium">Perfil</span>
+        </button>
+        
         <div className="flex items-center gap-3 px-2 mb-6">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center text-white font-bold">
             {user?.email?.charAt(0).toUpperCase()}

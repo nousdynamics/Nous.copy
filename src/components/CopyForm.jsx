@@ -27,7 +27,7 @@ export default function CopyForm({ onSubmit, loading = false }) {
     duracao: '30',
     densidade: 'informativo',
     urlFinal: '',
-    usarIA: false
+    modeloIA: 'gpt-4-turbo-preview'
   });
 
   const handleChange = (e) => {
@@ -132,20 +132,22 @@ export default function CopyForm({ onSubmit, loading = false }) {
               <Cpu className="text-primary" size={20} />
               Inteligência Artificial
             </h3>
-            <label className="flex items-center gap-3 cursor-pointer group">
-              <div className="relative">
-                <input
-                  type="checkbox"
-                  name="usarIA"
-                  checked={formData.usarIA}
-                  onChange={handleChange}
-                  className="sr-only"
-                />
-                <div className={`w-12 h-6 rounded-full transition-colors ${formData.usarIA ? 'bg-primary' : 'bg-white/10'}`}></div>
-                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${formData.usarIA ? 'translate-x-6' : ''}`}></div>
-              </div>
-              <span className="text-text-secondary group-hover:text-white transition-colors">Ativar geração com IA (GPT-4)</span>
-            </label>
+            <div>
+              <label className={labelStyle}>Modelo GPT</label>
+              <select
+                name="modeloIA"
+                value={formData.modeloIA}
+                onChange={handleChange}
+                className="dashboard-input w-full appearance-none"
+              >
+                <option value="gpt-4-turbo-preview">GPT-4 Turbo (Recomendado)</option>
+                <option value="gpt-4">GPT-4</option>
+                <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Rápido)</option>
+              </select>
+              <p className="text-xs text-text-muted mt-2">
+                As copies serão geradas automaticamente usando IA
+              </p>
+            </div>
           </div>
         </div>
 
@@ -286,14 +288,17 @@ export default function CopyForm({ onSubmit, loading = false }) {
         <button
           type="submit"
           disabled={loading}
-          className="btn-primary flex items-center gap-3 px-12 py-4 text-lg"
+          className="btn-primary flex items-center gap-3 px-8 py-3"
         >
           {loading ? (
-            <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+            <>
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              <span>Gerando Copy...</span>
+            </>
           ) : (
             <>
-              <Sparkles size={24} />
-              Gerar Copy de Elite
+              <Sparkles size={20} />
+              Gerar Copy
             </>
           )}
         </button>
