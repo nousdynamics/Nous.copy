@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import logoCompleta from '../assets/LOGO NOUS COPY COMPLETA.png';
-import logoFavicon from '../assets/LOGO FAV ICON NOUS COPY.png';
+import logoCompleta from '/assets/LOGO NOUS COPY COMPLETA.png';
+import logoFavicon from '/assets/LOGO FAV ICON NOUS COPY.png';
 
 export default function Logo({ className = "w-16 h-16", variant = "completa" }) {
   const logo = variant === "favicon" ? logoFavicon : logoCompleta;
