@@ -11,6 +11,7 @@ import Footer from './components/Footer';
 import Dashboard from './components/pages/Dashboard';
 import Templates from './components/pages/Templates';
 import Profile from './components/pages/Profile';
+import History from './components/pages/History';
 import { analiseEstrategica, gerarGancho, gerarCorpo, gerarCTA, ajustarParaDuracao } from './utils/copyGenerator';
 import { useOpenAI } from './hooks/useOpenAI';
 
@@ -37,7 +38,6 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Resetar resultado quando mudar de aba
   useEffect(() => {
     if (activeTab !== 'generator') {
       setShowResult(false);
@@ -60,13 +60,11 @@ function App() {
       const estrategia = analiseEstrategica(formData);
       let gancho, corpo, cta;
       
-      // Sempre usa IA agora
       try {
         gancho = await gerarGanchoIA(formData, estrategia);
         corpo = await gerarCorpoIA(formData, estrategia, gancho);
         cta = await gerarCTAIA(formData, estrategia);
       } catch (error) {
-        // Fallback para método padrão se IA falhar
         gancho = gerarGancho(formData, estrategia);
         corpo = gerarCorpo(formData, estrategia);
         cta = gerarCTA(formData, estrategia);
@@ -122,65 +120,27 @@ function App() {
   const handleExportar = () => window.print();
 
   const renderContent = () => {
-    if (activeTab === 'dashboard') {
-      return <Dashboard user={user} />;
-    }
-    
-    if (activeTab === 'generator') {
-      return (
+    switch(activeTab) {
+      case 'dashboard': return <Dashboard user={user} />;
+      case 'generator': return (
         <AnimatePresence mode="wait">
           {!showResult ? (
-            <motion.div
-              key="form"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-            >
+            <motion.div key="form" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
               <CopyForm onSubmit={handleGenerate} loading={loading} />
             </motion.div>
           ) : (
-            <motion.div
-              key="result"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
-              className="space-y-6"
-            >
-              <CopyResult
-                dados={copyData.dados}
-                gancho={copyData.gancho}
-                corpo={copyData.corpo}
-                cta={copyData.cta}
-                estrategia={copyData.estrategia}
-                onVoltar={handleVoltar}
-                onVariacoes={handleVariacoes}
-                onCopiar={handleCopiar}
-                onExportar={handleExportar}
-              />
-              
-              {showVariations && (
-                <Variations
-                  dados={copyData.dados}
-                  onClose={() => setShowVariations(false)}
-                />
-              )}
+            <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }} className="space-y-6">
+              <CopyResult dados={copyData.dados} gancho={copyData.gancho} corpo={copyData.corpo} cta={copyData.cta} estrategia={copyData.estrategia} onVoltar={handleVoltar} onVariacoes={handleVariacoes} onCopiar={handleCopiar} onExportar={handleExportar} />
+              {showVariations && <Variations dados={copyData.dados} onClose={() => setShowVariations(false)} />}
             </motion.div>
           )}
         </AnimatePresence>
       );
+      case 'templates': return <Templates />;
+      case 'history': return <History />;
+      case 'profile': return <Profile user={user} />;
+      default: return <Dashboard user={user} />;
     }
-    
-    if (activeTab === 'templates') {
-      return <Templates />;
-    }
-    
-    if (activeTab === 'profile') {
-      return <Profile user={user} />;
-    }
-    
-    return null;
   };
 
   if (loadingAuth) {
@@ -201,14 +161,11 @@ function App() {
   return (
     <div className="min-h-screen bg-dashboard-bg flex p-4 gap-6">
       <Sidebar user={user} onLogout={handleLogout} activeTab={activeTab} onTabChange={setActiveTab} />
-      
       <main className="flex-1 flex flex-col max-w-[1600px] mx-auto w-full">
         <Header user={user} />
-        
         <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
           {renderContent()}
         </div>
-        
         <Footer />
       </main>
     </div>
