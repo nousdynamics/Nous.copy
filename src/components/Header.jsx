@@ -27,7 +27,7 @@ export default function Header({ user, onLogout }) {
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
           className="h-16 w-auto"
-          src="src/assets/LOGO NOUS COPY COMPLETA.png"
+          src="assets/LOGO NOUS COPY COMPLETA.png"
           alt="Nous Copy Logo"
         >
         </motion.img>
