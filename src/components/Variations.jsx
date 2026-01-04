@@ -27,15 +27,15 @@ export default function Variations({ dados, onClose }) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 20 }}
         transition={{ duration: 0.3 }}
-        className="bg-slate-800/50 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-slate-700 mt-6"
+        className="bg-bg-card rounded-3xl p-8 shadow-2xl border border-border mt-6"
       >
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold text-slate-100">Variações A/B</h2>
+          <h2 className="text-3xl font-bold text-text-primary">Variações A/B</h2>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={onClose}
-            className="px-6 py-3 bg-slate-700 text-slate-100 rounded-xl border border-slate-600 hover:bg-slate-600 transition-colors"
+            className="px-6 py-3 bg-bg-secondary text-text-primary rounded-xl border border-border hover:bg-bg-secondary/80 transition-colors"
           >
             Fechar Variações
           </motion.button>
@@ -49,22 +49,22 @@ export default function Variations({ dados, onClose }) {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.1 }}
               whileHover={{ scale: 1.02, y: -5 }}
-              className="bg-slate-700/30 rounded-2xl p-6 border-2 border-slate-600 hover:border-pink-500 transition-colors"
+              className="bg-bg-secondary/30 rounded-2xl p-6 border-2 border-border hover:border-primary transition-colors"
             >
-              <h4 className="text-xl font-semibold text-pink-400 mb-4">
+              <h4 className="text-xl font-semibold text-primary mb-4">
                 Variação: {PECADOS_CAPITAIS[variacao.pecado].nome}
               </h4>
-              <div className="space-y-3 text-slate-300">
-                <div className="bg-slate-800/50 p-4 rounded-xl border-l-3 border-pink-500">
-                  <p className="font-semibold text-pink-400 mb-1">GANCHO:</p>
+              <div className="space-y-3 text-text-secondary">
+                <div className="bg-bg-secondary/50 p-4 rounded-xl border-l-3 border-primary">
+                  <p className="font-semibold text-primary mb-1">GANCHO:</p>
                   <p className="italic">{variacao.gancho}</p>
                 </div>
-                <div className="bg-slate-800/50 p-4 rounded-xl border-l-3 border-indigo-500">
-                  <p className="font-semibold text-indigo-400 mb-1">CORPO:</p>
+                <div className="bg-bg-secondary/50 p-4 rounded-xl border-l-3 border-primary">
+                  <p className="font-semibold text-primary mb-1">CORPO:</p>
                   <p className="italic">{variacao.corpo}</p>
                 </div>
-                <div className="bg-slate-800/50 p-4 rounded-xl border-l-3 border-purple-500">
-                  <p className="font-semibold text-purple-400 mb-1">CTA:</p>
+                <div className="bg-bg-secondary/50 p-4 rounded-xl border-l-3 border-primary">
+                  <p className="font-semibold text-primary mb-1">CTA:</p>
                   <p className="italic">{variacao.cta}</p>
                 </div>
               </div>

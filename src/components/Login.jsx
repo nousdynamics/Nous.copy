@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '../services/supabaseClient';
+import Logo from './Logo';
 
 export default function Login({ onLoginSuccess }) {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -50,14 +51,14 @@ export default function Login({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-bg-darker">
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="bg-slate-800/50 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-slate-700">
+        <div className="bg-bg-card rounded-3xl p-8 shadow-2xl border border-border">
           {/* Logo/Título */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -65,26 +66,30 @@ export default function Login({ onLoginSuccess }) {
             transition={{ delay: 0.2 }}
             className="text-center mb-8"
           >
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-2">
-              Nous.Copy
-            </h1>
-            <p className="text-slate-400 text-sm">
+            <div className="flex items-center justify-center gap-4 mb-4">
+            <img
+            src="src/assets/LOGO NOUS COPY COMPLETA.png"
+            alt="Nous Copy Logo"
+            className="h-16 w-auto"
+            />
+            </div>
+            <p className="text-text-secondary text-sm">
               Gerador de Copies de Elite
             </p>
           </motion.div>
 
           {/* Tabs Login/Cadastro */}
-          <div className="flex gap-2 mb-6 bg-slate-700/30 p-1 rounded-xl">
+          <div className="flex gap-2 mb-6 bg-bg-input p-1 rounded-xl">
             <button
               type="button"
               onClick={() => {
                 setIsSignUp(false);
                 setError(null);
               }}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
+              className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all ${
                 !isSignUp
-                  ? 'bg-indigo-600 text-white shadow-lg'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-gradient-radial text-white shadow-lg'
+                  : 'text-text-muted hover:text-text-secondary'
               }`}
             >
               Entrar
@@ -95,10 +100,10 @@ export default function Login({ onLoginSuccess }) {
                 setIsSignUp(true);
                 setError(null);
               }}
-              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
+              className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all ${
                 isSignUp
-                  ? 'bg-indigo-600 text-white shadow-lg'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-primary text-white shadow-lg'
+                  : 'text-text-muted hover:text-text-secondary'
               }`}
             >
               Cadastrar
@@ -106,7 +111,7 @@ export default function Login({ onLoginSuccess }) {
           </div>
 
           {/* Formulário */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -118,7 +123,7 @@ export default function Login({ onLoginSuccess }) {
             )}
 
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-2">
+              <label className="block text-text-secondary text-sm font-medium mb-2">
                 E-mail
               </label>
               <input
@@ -126,14 +131,14 @@ export default function Login({ onLoginSuccess }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-slate-700 border-2 border-slate-600 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500 transition-colors"
+                className="w-full px-4 py-3 bg-bg-input border-2 border-border rounded-xl text-text-primary focus:outline-none focus:border-primary transition-colors"
                 placeholder="seu@email.com"
                 disabled={loading}
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-2">
+              <label className="block text-text-secondary text-sm font-medium mb-2">
                 Senha
               </label>
               <input
@@ -142,7 +147,7 @@ export default function Login({ onLoginSuccess }) {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 bg-slate-700 border-2 border-slate-600 rounded-xl text-slate-100 focus:outline-none focus:border-indigo-500 transition-colors"
+                className="w-full px-4 py-3 bg-bg-input border-2 border-border rounded-xl text-text-primary focus:outline-none focus:border-primary transition-colors"
                 placeholder="••••••••"
                 disabled={loading}
               />
@@ -153,7 +158,7 @@ export default function Login({ onLoginSuccess }) {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               disabled={loading}
-              className="w-full py-3 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3.5 px-6 bg-gradient-radial text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -170,7 +175,7 @@ export default function Login({ onLoginSuccess }) {
           </form>
 
           {isSignUp && (
-            <p className="mt-4 text-center text-xs text-slate-400">
+            <p className="mt-4 text-center text-xs text-text-muted">
               Ao cadastrar, você concorda com nossos termos de serviço
             </p>
           )}
@@ -181,7 +186,7 @@ export default function Login({ onLoginSuccess }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="text-center text-slate-400 text-sm mt-6"
+          className="text-center text-text-muted text-sm mt-6"
         >
           Versão 6.0 | Janeiro 2026
         </motion.p>

@@ -6,23 +6,38 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        serif: ['Georgia', 'Times New Roman', 'serif'],
+        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'sans-serif'],
+      },
       colors: {
         primary: {
-          DEFAULT: '#6366f1',
-          dark: '#4f46e5',
+          DEFAULT: '#FD7D02', // Orange principal
+          dark: '#C40B00',
+          darker: '#730100',
+          darkest: '#500100',
         },
-        secondary: '#8b5cf6',
-        accent: '#ec4899',
+        accent: {
+          DEFAULT: '#C40B00',
+          dark: '#730100',
+        },
         bg: {
-          DEFAULT: '#0f172a',
-          card: '#1e293b',
-          input: '#334155',
+          DEFAULT: '#000000', // Preto
+          card: '#1B1B1B',
+          input: '#1B1B1B',
+          secondary: '#484848',
+          darker: '#000000',
         },
         text: {
-          primary: '#f1f5f9',
-          secondary: '#cbd5e1',
+          primary: '#FFFFFF',
+          secondary: '#CFCFCF',
+          muted: '#999999',
         },
-        border: '#475569',
+        border: '#484848',
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(100% 100% at 50% 0%, #FD7D02 0%, #C40B00 36.54%, #730100 68.76%, #500100 100%)',
+        'gradient-text': 'linear-gradient(180deg, #FFFFFF 0%, #CFCFCF 100%)',
       },
     },
   },

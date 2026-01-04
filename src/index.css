@@ -4,8 +4,14 @@
 
 @layer base {
   body {
-    @apply bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-slate-100 min-h-screen;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #000000;
+    @apply text-text-primary min-h-screen;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-weight: bold;
   }
   
   /* Scrollbar personalizada */
@@ -14,14 +20,15 @@
   }
   
   ::-webkit-scrollbar-track {
-    @apply bg-slate-900;
+    background-color: #000000;
   }
   
   ::-webkit-scrollbar-thumb {
-    @apply bg-indigo-600 rounded-full;
+    background: linear-gradient(180deg, #FD7D02 0%, #C40B00 100%);
+    border-radius: 9999px;
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-indigo-500;
+    background: linear-gradient(180deg, #C40B00 0%, #730100 100%);
   }
 }
