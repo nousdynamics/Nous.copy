@@ -158,6 +158,18 @@ export const BASE_FIELDS = [
     ordem: 8,
     placeholder: 'Ex: Preço, confiança'
   },
+  {
+    id: 'curiosidade_ou_dor',
+    label: 'Foco: Curiosidade ou Dor',
+    tipo: FIELD_TYPES.SELECT,
+    bloco: FORM_BLOCKS.PUBLICO_ALVO,
+    ordem: 9,
+    opcoes: [
+      { value: 'curiosidade', label: 'Curiosidade' },
+      { value: 'dor', label: 'Dor' },
+      { value: 'ambos', label: 'Ambos' }
+    ]
+  },
   
   // Bloco: Oferta
   {
@@ -257,6 +269,14 @@ export const BASE_FIELDS = [
       { value: 'bonus_por_tempo', label: 'Bônus por Tempo' },
       { value: 'preco_promocional', label: 'Preço Promocional' }
     ]
+  },
+  {
+    id: 'duracao_vsl',
+    label: 'Duração da VSL (minutos)',
+    tipo: FIELD_TYPES.NUMBER,
+    bloco: FORM_BLOCKS.OFERTA,
+    ordem: 11,
+    placeholder: 'Ex: 5'
   },
   
   // Bloco: Estratégia de Venda
@@ -486,6 +506,26 @@ export const BASE_FIELDS = [
     bloco: FORM_BLOCKS.CONFIGURACOES_COPY,
     ordem: 9,
     placeholder: 'Ex: nunca, sempre'
+  },
+  
+  // Campos para Estrutura Invisível
+  {
+    id: 'copy_concorrente',
+    label: 'Copy do Concorrente',
+    tipo: FIELD_TYPES.TEXTAREA,
+    bloco: FORM_BLOCKS.ESTRATEGIA_VENDA,
+    ordem: 10,
+    placeholder: 'Cole aqui a copy completa do seu concorrente para análise e modelagem...',
+    rows: 10
+  },
+  {
+    id: 'observacoes_adaptacao',
+    label: 'Observações e Adaptações Desejadas',
+    tipo: FIELD_TYPES.TEXTAREA,
+    bloco: FORM_BLOCKS.ESTRATEGIA_VENDA,
+    ordem: 11,
+    placeholder: 'Descreva o que você quer adaptar, modificar ou melhorar nesta copy. Ex: "Trocar o produto para meu serviço", "Adicionar mais urgência", "Focar em outro público", etc.',
+    rows: 6
   }
 ];
 

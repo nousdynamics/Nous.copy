@@ -11,6 +11,9 @@ import Footer from './components/Footer';
 import Dashboard from './components/pages/Dashboard';
 import Templates from './components/pages/Templates';
 import Profile from './components/pages/Profile';
+import History from './components/pages/History';
+import AgentsSelection from './components/pages/AgentsSelection';
+import AgentCopyForm from './components/AgentCopyForm';
 import { analiseEstrategica, gerarGancho, gerarCorpo, gerarCTA, ajustarParaDuracao } from './utils/copyGenerator';
 import { useOpenAI } from './hooks/useOpenAI';
 import { useTemplate } from './hooks/useTemplate';
@@ -24,6 +27,7 @@ function App() {
   const [copyData, setCopyData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [prefilledData, setPrefilledData] = useState(null);
+  const [selectedAgent, setSelectedAgent] = useState(null);
   const { gerarGancho: gerarGanchoIA, gerarCorpo: gerarCorpoIA, gerarCTA: gerarCTAIA } = useOpenAI();
   const templateManager = useTemplate();
 
@@ -73,9 +77,76 @@ function App() {
     setShowResult(false);
   };
 
-  const handleGenerate = async (formData) => {
-    setLoading(true);
+  const handleGenerate = async (formData, showLoading = true, agentId = null) => {
+    if (showLoading) {
+      setLoading(true);
+    }
     try {
+      // Verificar se é o agente de Estrutura Invisível
+      if (agentId === 'estrutura_invisivel' || formData.copy_concorrente) {
+        const { gerarEstruturaInvisivelComIA } = await import('./services/openaiService');
+        let result;
+        try {
+          result = await gerarEstruturaInvisivelComIA(formData);
+        } catch (error) {
+          console.warn('Erro ao gerar estrutura invisível com IA:', error);
+          // Fallback básico
+          result = {
+            gancho: 'Copy adaptada da estrutura do concorrente',
+            corpo: formData.copy_concorrente || 'Copy adaptada',
+            cta: 'Acesse agora e garanta seu resultado'
+          };
+        }
+        
+        const copyResult = {
+          dados: formData,
+          estrategia: { tipo: 'estrutura_invisivel', pontoDor: '', premissa: '', pecado: {}, nivel: {} },
+          gancho: result.gancho,
+          corpo: result.corpo,
+          cta: result.cta,
+          geradoComIA: true
+        };
+        
+        if (showLoading) {
+          setCopyData(copyResult);
+          setShowResult(true);
+          setShowVariations(false);
+          setPrefilledData(null);
+          
+          // Salvar no histórico
+          if (user) {
+            try {
+              const title = 'Estrutura Invisível - Copy adaptada';
+              const platform = 'estrutura_invisivel';
+              const method = 'Estrutura Invisível';
+              
+              const { error: historyError } = await supabase
+                .from('copy_history')
+                .insert([{
+                  user_id: user.id,
+                  title: title,
+                  form_data: formData,
+                  gancho: result.gancho,
+                  corpo: result.corpo,
+                  cta: result.cta,
+                  estrategia: copyResult.estrategia,
+                  platform: platform,
+                  method: method
+                }]);
+              
+              if (historyError) {
+                console.error('Erro ao salvar no histórico:', historyError);
+              }
+            } catch (historyErr) {
+              console.error('Erro ao salvar histórico:', historyErr);
+            }
+          }
+        }
+        
+        return copyResult;
+      }
+
+      // Lógica normal para outros agentes
       const estrategia = analiseEstrategica(formData);
       let gancho, corpo, cta;
       
@@ -84,6 +155,7 @@ function App() {
         corpo = await gerarCorpoIA(formData, estrategia, gancho);
         cta = await gerarCTAIA(formData, estrategia);
       } catch (error) {
+        console.warn('Erro ao gerar com IA, usando fallback:', error);
         gancho = gerarGancho(formData, estrategia);
         corpo = gerarCorpo(formData, estrategia);
         cta = gerarCTA(formData, estrategia);
@@ -101,29 +173,71 @@ function App() {
         }
       }
       
-      setCopyData({
+      const copyResult = {
         dados: formData,
         estrategia,
         gancho,
         corpo,
         cta,
         geradoComIA: true
-      });
+      };
       
-      setShowResult(true);
-      setShowVariations(false);
-      setPrefilledData(null); // Limpa dados pré-preenchidos após gerar
+      // Se showLoading, atualizar estado para modo antigo (compatibilidade)
+      if (showLoading) {
+        setCopyData(copyResult);
+        setShowResult(true);
+        setShowVariations(false);
+        setPrefilledData(null);
+        
+        // Salvar no histórico
+        if (user) {
+          try {
+            const title = formData.oferta_nome || formData.negocio_nome || formData.profissional_nome || 'Copy gerada';
+            const platform = formData.canal_principal || 'Não especificado';
+            const method = formData.metodologia_base || 'Não especificado';
+            
+            const { error: historyError } = await supabase
+              .from('copy_history')
+              .insert([{
+                user_id: user.id,
+                title: title,
+                form_data: formData,
+                gancho: gancho,
+                corpo: corpo,
+                cta: cta,
+                estrategia: estrategia,
+                platform: platform,
+                method: method
+              }]);
+            
+            if (historyError) {
+              console.error('Erro ao salvar no histórico:', historyError);
+            }
+          } catch (historyErr) {
+            console.error('Erro ao salvar histórico:', historyErr);
+          }
+        }
+      }
+      
+      // Retornar o resultado para permitir múltiplas gerações
+      return copyResult;
     } catch (error) {
       console.error('Erro ao gerar copy:', error);
-      alert('Erro ao gerar copy. Tente novamente.');
+      if (showLoading) {
+        alert('Erro ao gerar copy. Tente novamente.');
+      }
+      throw error;
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   };
 
   const handleVoltar = () => {
     setShowResult(false);
     setShowVariations(false);
+    setSelectedAgent(null);
     setActiveTab('generator');
   };
 
@@ -146,38 +260,47 @@ function App() {
         <AnimatePresence mode="wait">
           {!showResult ? (
             <motion.div key="form" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
-              <CopyForm 
-                onSubmit={handleGenerate} 
-                loading={loading} 
-                prefilledData={prefilledData}
-                templateManager={templateManager}
-                onSaveAsTemplate={async (templateData) => {
-                  // Criar template do usuário
-                  if (!user) {
-                    alert('Você precisa estar logado para criar templates');
-                    return;
-                  }
-
-                  try {
-                    const { error } = await supabase
-                      .from('user_templates')
-                      .insert([{
-                        user_id: user.id,
-                        nome: templateData.nome,
-                        descricao: templateData.descricao,
-                        base_template_id: templateData.base_template_id,
-                        valores_predefinidos: templateData.valores_predefinidos
-                      }]);
-                    
-                    if (error) throw error;
-                    
-                    alert('Template criado com sucesso!');
-                  } catch (error) {
-                    console.error('Erro ao criar template:', error);
-                    alert('Erro ao criar template. Verifique se a tabela user_templates existe no Supabase.');
-                  }
-                }}
-              />
+              {selectedAgent ? (
+                <AgentCopyForm
+                  agent={selectedAgent}
+                  onSubmit={async (formData, showLoading, agentId) => {
+                    return await handleGenerate(formData, showLoading, agentId);
+                  }}
+                  loading={loading}
+                  onBack={() => setSelectedAgent(null)}
+                  user={user}
+                  supabaseClient={supabase}
+                  onSaveAsTemplate={async (templateData) => {
+                    if (!user) {
+                      alert('Você precisa estar logado para criar templates');
+                      return;
+                    }
+                    try {
+                      const { error } = await supabase
+                        .from('user_templates')
+                        .insert([{
+                          user_id: user.id,
+                          nome: templateData.nome,
+                          descricao: templateData.descricao,
+                          base_template_id: templateData.base_template_id,
+                          valores_predefinidos: templateData.valores_predefinidos
+                        }]);
+                      if (error) throw error;
+                      alert('Template criado com sucesso!');
+                    } catch (error) {
+                      console.error('Erro ao criar template:', error);
+                      alert('Erro ao criar template. Verifique se a tabela user_templates existe no Supabase.');
+                    }
+                  }}
+                />
+              ) : (
+                <AgentsSelection 
+                  onSelectAgent={(agent) => {
+                    setSelectedAgent(agent);
+                    setShowResult(false);
+                  }}
+                />
+              )}
             </motion.div>
           ) : (
             <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }} className="space-y-6">
@@ -188,6 +311,11 @@ function App() {
         </AnimatePresence>
       );
       case 'templates': return <Templates onUseTemplate={handleUseTemplate} user={user} templateManager={templateManager} />;
+      case 'history': return <History user={user} onViewCopy={(copyData) => {
+        setCopyData(copyData);
+        setShowResult(true);
+        setActiveTab('generator');
+      }} />;
       case 'profile': return <Profile user={user} />;
       default: return <Dashboard user={user} />;
     }

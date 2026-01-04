@@ -4,7 +4,8 @@ import {
   LogOut,
   Sparkles,
   Layers,
-  User
+  User,
+  History
 } from 'lucide-react';
 
 export default function Sidebar({ user, onLogout, activeTab = 'dashboard', onTabChange }) {
@@ -12,6 +13,7 @@ export default function Sidebar({ user, onLogout, activeTab = 'dashboard', onTab
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'generator', icon: Sparkles, label: 'Gerador' },
     { id: 'templates', icon: Layers, label: 'Templates' },
+    { id: 'history', icon: History, label: 'Histórico' },
   ];
 
   return (

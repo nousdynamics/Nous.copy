@@ -86,7 +86,7 @@ export default function CopyForm({ onSubmit, loading = false, prefilledData = nu
   const validateForm = () => {
     const newErrors = {};
     
-    // Validar campos obrigatórios
+    // Validar campos obrigatórios do template
     BASE_FIELDS.forEach(field => {
       const isVisible = templateManager ? templateManager.isFieldVisible(field.id) : true;
       const isRequired = templateManager ? templateManager.isFieldRequired(field.id) : false;
@@ -99,7 +99,7 @@ export default function CopyForm({ onSubmit, loading = false, prefilledData = nu
       }
     });
     
-    // Validar campos extras
+    // Validar campos extras do template
     if (templateManager) {
       const extraFields = templateManager.getExtraFields();
       extraFields.forEach(field => {
@@ -112,6 +112,28 @@ export default function CopyForm({ onSubmit, loading = false, prefilledData = nu
       });
     }
     
+    // Se não há templateManager, validar campos mínimos essenciais
+    if (!templateManager) {
+      const essentialFields = [
+        'profissional_nome',
+        'publico_descricao',
+        'oferta_nome'
+      ];
+      
+      let hasAtLeastOne = false;
+      essentialFields.forEach(fieldId => {
+        const value = formData[fieldId];
+        if (value && typeof value === 'string' && value.trim() !== '') {
+          hasAtLeastOne = true;
+        }
+      });
+      
+      if (!hasAtLeastOne) {
+        // Não bloquear, apenas avisar - permitir gerar mesmo assim
+        console.warn('Formulário com poucos dados preenchidos');
+      }
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -120,13 +142,25 @@ export default function CopyForm({ onSubmit, loading = false, prefilledData = nu
     e.preventDefault();
     
     if (!validateForm()) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
+      // Mostrar os erros específicos em vez de apenas alerta genérico
+      const errorMessages = Object.values(errors);
+      if (errorMessages.length > 0) {
+        alert(`Por favor, corrija os seguintes erros:\n\n${errorMessages.join('\n')}`);
+      } else {
+        alert('Por favor, preencha todos os campos obrigatórios.');
+      }
       return;
     }
     
     // Converter dados para formato legado se necessário
-    const legacyData = adaptFormDataToLegacy(formData);
-    onSubmit(legacyData);
+    try {
+      const legacyData = adaptFormDataToLegacy(formData);
+      console.log('Dados enviados para geração:', legacyData);
+      onSubmit(legacyData);
+    } catch (error) {
+      console.error('Erro ao adaptar dados do formulário:', error);
+      alert('Erro ao processar o formulário. Verifique os dados e tente novamente.');
+    }
   };
 
   const handleClearTemplate = () => {

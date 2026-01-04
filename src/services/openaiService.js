@@ -188,4 +188,125 @@ export async function gerarCopyCompletaComIA(dados, estrategia) {
   }
 }
 
+/**
+ * Gera uma copy usando Estrutura Invisível - analisa copy do concorrente e adapta
+ * @param {Object} dados - Dados do formulário (deve conter copy_concorrente e observacoes_adaptacao)
+ * @returns {Promise<Object>} Objeto com gancho, corpo e cta seguindo a estrutura de 8 etapas
+ */
+export async function gerarEstruturaInvisivelComIA(dados) {
+  const copyConcorrente = dados.copy_concorrente || '';
+  const observacoes = dados.observacoes_adaptacao || '';
+  
+  if (!copyConcorrente.trim()) {
+    throw new Error('Copy do concorrente é obrigatória para gerar Estrutura Invisível');
+  }
+
+  const prompt = `Você é um especialista em copywriting estratégico. Analise a copy do concorrente abaixo e crie uma nova copy adaptada seguindo exatamente a ESTRUTURA INVISÍVEL de 8 etapas:
+
+COPY DO CONCORRENTE:
+${copyConcorrente}
+
+OBSERVAÇÕES E ADAPTAÇÕES DESEJADAS:
+${observacoes || 'Adaptar para meu negócio mantendo a estrutura original'}
+
+---
+
+ESTRUTURA INVISÍVEL (8 ETAPAS OBRIGATÓRIAS):
+
+1. HOOK DE QUEBRA DE PADRÃO
+   - Crie um gancho que quebra expectativas e captura atenção imediata
+   - Baseado no gancho original, mas adaptado
+
+2. AGITAÇÃO DO PROBLEMA
+   - Identifique e amplifique a dor/problema que a copy original abordava
+   - Adapte para o contexto das observações
+
+3. DESTAQUE DA INEFICIÊNCIA DA SOLUÇÃO ATUAL
+   - Mostre por que as soluções tradicionais não funcionam
+   - Mantenha a lógica do original
+
+4. APRESENTAÇÃO DO NOVO MECANISMO
+   - Revele o mecanismo/solução (adaptado conforme observações)
+   - Explique como funciona de forma clara
+
+5. REMOÇÃO DE OBJEÇÕES
+   - Antecipe e responda objeções comuns
+   - Foque em facilidade, conveniência, garantias
+
+6. PROVA DE LTV EMOCIONAL (RETENÇÃO)
+   - Mostre resultados, depoimentos, provas sociais
+   - Estabeleça autoridade e confiança
+
+7. CHAMADA PARA AÇÃO (CTA COM BENEFÍCIO)
+   - Crie um CTA claro com benefício específico
+   - Gere urgência ou escassez se aplicável
+
+8. FECHAMENTO COM IMPACTO (ANCORAGEM DE VALOR)
+   - Reforce o valor e o diferencial
+   - Deixe uma última impressão memorável
+
+---
+
+INSTRUÇÕES:
+- Mantenha a essência e estrutura da copy original
+- Adapte conteúdo conforme as observações fornecidas
+- Separe claramente as 8 etapas na resposta
+- O texto deve fluir naturalmente, como uma única copy coesa
+- Não mencione explicitamente "Etapa 1", "Etapa 2", etc. no texto final
+
+Gere APENAS a copy adaptada, organizando em:
+- GANCHO: (apenas o hook de quebra de padrão)
+- CORPO: (etapas 2 a 7 integradas em parágrafos fluídos)
+- CTA: (etapas 7 e 8 combinadas - CTA com benefício e fechamento de impacto)
+
+Formato da resposta:
+GANCHO: [texto do gancho]
+
+CORPO: [texto do corpo com etapas 2-7 integradas]
+
+CTA: [texto do CTA com etapas 7-8]`;
+
+  try {
+    const response = await generateWithOpenAI({ 
+      prompt, 
+      model: "gpt-4-turbo-preview" 
+    });
+
+    // Extrair gancho, corpo e CTA da resposta
+    const lines = response.split('\n');
+    let gancho = '';
+    let corpo = '';
+    let cta = '';
+    let currentSection = null;
+
+    lines.forEach(line => {
+      if (line.toUpperCase().includes('GANCHO:')) {
+        currentSection = 'gancho';
+        gancho = line.replace(/GANCHO:\s*/i, '').trim();
+      } else if (line.toUpperCase().includes('CORPO:')) {
+        currentSection = 'corpo';
+        corpo = line.replace(/CORPO:\s*/i, '').trim();
+      } else if (line.toUpperCase().includes('CTA:')) {
+        currentSection = 'cta';
+        cta = line.replace(/CTA:\s*/i, '').trim();
+      } else if (currentSection === 'gancho' && line.trim()) {
+        gancho += ' ' + line.trim();
+      } else if (currentSection === 'corpo' && line.trim()) {
+        corpo += '\n\n' + line.trim();
+      } else if (currentSection === 'cta' && line.trim()) {
+        cta += ' ' + line.trim();
+      }
+    });
+
+    return {
+      gancho: gancho.trim() || 'Copy adaptada com sucesso',
+      corpo: corpo.trim() || response,
+      cta: cta.trim() || 'Clique aqui para garantir sua vaga'
+    };
+  } catch (error) {
+    console.error('Erro ao gerar estrutura invisível:', error);
+    throw error;
+  }
+}
+
 export default openai;
