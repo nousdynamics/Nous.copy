@@ -16,6 +16,7 @@ import { BASE_FIELDS, FORM_BLOCKS, BLOCK_LABELS, getFieldsByBlock, getFieldById 
 import DynamicFormField from './DynamicFormField';
 import { adaptFormDataToLegacy } from '../utils/formDataAdapter';
 import CreateTemplateModal from './pages/CreateTemplateModal';
+import AccordionCard from './AccordionCard';
 
 const BLOCK_ICONS = {
   [FORM_BLOCKS.DADOS_NEGOCIO]: Briefcase,
@@ -136,8 +137,6 @@ export default function CopyForm({ onSubmit, loading = false, prefilledData = nu
     setErrors({});
   };
 
-  const inputGroupStyle = "glass-card p-6 space-y-4 border-white/5 hover:border-primary/20 transition-colors";
-
   // Obter blocos visíveis
   const getVisibleBlocks = () => {
     const blocks = Object.values(FORM_BLOCKS);
@@ -167,8 +166,8 @@ export default function CopyForm({ onSubmit, loading = false, prefilledData = nu
     return [...visibleFields, ...visibleExtraFields];
   };
 
-  // Renderizar bloco de campos
-  const renderBlock = (blockId) => {
+  // Renderizar bloco de campos como accordion
+  const renderBlock = (blockId, index) => {
     const allFields = getVisibleFieldsInBlock(blockId);
     
     if (allFields.length === 0) return null;
@@ -177,40 +176,38 @@ export default function CopyForm({ onSubmit, loading = false, prefilledData = nu
     const blockLabel = BLOCK_LABELS[blockId];
     
     return (
-      <div key={blockId} className={inputGroupStyle}>
-        <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
-          {BlockIcon && <BlockIcon className="text-primary" size={20} />}
-          {blockLabel}
-        </h3>
-        
-        <div className="space-y-4">
-          {allFields.map(field => {
-            const fieldConfig = getFieldById(field.id) || field;
-            const isRequired = templateManager ? templateManager.isFieldRequired(field.id) : false;
-            const isLocked = templateManager ? templateManager.isFieldLocked(field.id) : false;
-            const fieldError = errors[field.id];
-            
-            return (
-              <div key={field.id}>
-                <DynamicFormField
-                  field={fieldConfig}
-                  value={formData[field.id]}
-                  onChange={handleFieldChange}
-                  required={isRequired}
-                  locked={isLocked}
-                  templateManager={templateManager}
-                />
-                {fieldError && (
-                  <div className="flex items-center gap-1 mt-1 text-xs text-red-400">
-                    <AlertCircle size={12} />
-                    <span>{fieldError}</span>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      <AccordionCard
+        key={blockId}
+        title={blockLabel}
+        icon={BlockIcon}
+        defaultOpen={index === 0} // Primeiro bloco aberto por padrão
+      >
+        {allFields.map(field => {
+          const fieldConfig = getFieldById(field.id) || field;
+          const isRequired = templateManager ? templateManager.isFieldRequired(field.id) : false;
+          const isLocked = templateManager ? templateManager.isFieldLocked(field.id) : false;
+          const fieldError = errors[field.id];
+          
+          return (
+            <div key={field.id}>
+              <DynamicFormField
+                field={fieldConfig}
+                value={formData[field.id]}
+                onChange={handleFieldChange}
+                required={isRequired}
+                locked={isLocked}
+                templateManager={templateManager}
+              />
+              {fieldError && (
+                <div className="flex items-center gap-1 mt-1 text-xs text-red-400">
+                  <AlertCircle size={12} />
+                  <span>{fieldError}</span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </AccordionCard>
     );
   };
 
@@ -259,17 +256,9 @@ export default function CopyForm({ onSubmit, loading = false, prefilledData = nu
         </motion.div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Coluna 1: Primeiros 3 blocos */}
-          <div className="space-y-6">
-            {visibleBlocks.slice(0, 3).map(blockId => renderBlock(blockId))}
-          </div>
-
-          {/* Coluna 2: Últimos 2 blocos */}
-          <div className="space-y-6">
-            {visibleBlocks.slice(3).map(blockId => renderBlock(blockId))}
-          </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-4">
+          {visibleBlocks.map((blockId, index) => renderBlock(blockId, index))}
         </div>
 
         {/* Botões de Ação */}

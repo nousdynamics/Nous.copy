@@ -91,7 +91,8 @@ function mapCanalPrincipal(novo) {
     'vsl': 'meta-ads-video',
     'anuncio_meta_ads': 'meta-ads-imagem',
     'post_redes_sociais': 'instagram-reels',
-    'sequencia_emails': 'meta-ads-video'
+    'sequencia_emails': 'meta-ads-video',
+    'titulos_google_ads': 'google-ads-pesquisa'
   };
   return mapping[novo] || novo;
 }
@@ -101,7 +102,7 @@ function unmapCanalPrincipal(legado) {
     'meta-ads-video': 'vsl',
     'meta-ads-imagem': 'anuncio_meta_ads',
     'instagram-reels': 'post_redes_sociais',
-    'google-ads-pesquisa': 'anuncio_meta_ads'
+    'google-ads-pesquisa': 'titulos_google_ads'
   };
   return mapping[legado] || 'vsl';
 }

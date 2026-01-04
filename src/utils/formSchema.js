@@ -272,7 +272,8 @@ export const BASE_FIELDS = [
       { value: 'anuncio_meta_ads', label: 'Anúncio Meta Ads' },
       { value: 'sequencia_emails', label: 'Sequência de E-mails' },
       { value: 'post_redes_sociais', label: 'Post para Redes Sociais' },
-      { value: 'roteiro_video_curto', label: 'Roteiro de Vídeo Curto' }
+      { value: 'roteiro_video_curto', label: 'Roteiro de Vídeo Curto' },
+      { value: 'titulos_google_ads', label: 'Títulos do Google Ads' }
     ]
   },
   {
@@ -308,7 +309,7 @@ export const BASE_FIELDS = [
   {
     id: 'gatilhos_secundarios',
     label: 'Gatilhos Secundários',
-    tipo: FIELD_TYPES.MULTISELECT,
+    tipo: FIELD_TYPES.SELECT,
     bloco: FORM_BLOCKS.ESTRATEGIA_VENDA,
     ordem: 4,
     opcoes: [
