@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from './services/supabaseClient';
 import Login from './components/Login';
 import Header from './components/Header';
+import Sidebar from './components/Sidebar';
 import CopyForm from './components/CopyForm';
 import CopyResult from './components/CopyResult';
 import Variations from './components/Variations';
@@ -20,16 +21,12 @@ function App() {
   const { gerarGancho: gerarGanchoIA, gerarCorpo: gerarCorpoIA, gerarCTA: gerarCTAIA } = useOpenAI();
 
   useEffect(() => {
-    // Verificar sessão atual
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoadingAuth(false);
     });
 
-    // Ouvir mudanças de autenticação
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
 
@@ -47,35 +44,26 @@ function App() {
 
   const handleGenerate = async (formData) => {
     setLoading(true);
-    
     try {
-      // Análise estratégica
       const estrategia = analiseEstrategica(formData);
-      
       let gancho, corpo, cta;
       
-      // Verificar se deve usar IA
       if (formData.usarIA) {
         try {
-          // Gerar com IA
           gancho = await gerarGanchoIA(formData, estrategia);
           corpo = await gerarCorpoIA(formData, estrategia, gancho);
           cta = await gerarCTAIA(formData, estrategia);
         } catch (error) {
-          console.error('Erro ao gerar com IA, usando método padrão:', error);
-          // Fallback para método padrão
           gancho = gerarGancho(formData, estrategia);
           corpo = gerarCorpo(formData, estrategia);
           cta = gerarCTA(formData, estrategia);
         }
       } else {
-        // Gerar componentes com método padrão
         gancho = gerarGancho(formData, estrategia);
         corpo = gerarCorpo(formData, estrategia);
         cta = gerarCTA(formData, estrategia);
       }
       
-      // Ajustar para duração se for vídeo
       if (formData.duracao) {
         const textoCompleto = gancho + ' ' + corpo + ' ' + cta;
         const palavrasCompletas = textoCompleto.trim().split(/\s+/).filter(p => p.length > 0).length;
@@ -118,30 +106,15 @@ function App() {
 
   const handleCopiar = () => {
     if (!copyData) return;
-    
-    const texto = `
-GANCHO: ${copyData.gancho}
-
-CORPO: ${copyData.corpo}
-
-CTA: ${copyData.cta}
-    `.trim();
-    
-    navigator.clipboard.writeText(texto).then(() => {
-      alert('Copy copiada para a área de transferência!');
-    }).catch(() => {
-      alert('Erro ao copiar. Tente selecionar o texto manualmente.');
-    });
+    const texto = `GANCHO: ${copyData.gancho}\n\nCORPO: ${copyData.corpo}\n\nCTA: ${copyData.cta}`.trim();
+    navigator.clipboard.writeText(texto).then(() => alert('Copy copiada!')).catch(() => alert('Erro ao copiar.'));
   };
 
-  const handleExportar = () => {
-    window.print();
-  };
+  const handleExportar = () => window.print();
 
-  // Mostrar loading enquanto verifica autenticação
   if (loadingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-darker">
+      <div className="min-h-screen flex items-center justify-center bg-dashboard-bg">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-text-secondary">Carregando...</p>
@@ -150,59 +123,63 @@ CTA: ${copyData.cta}
     );
   }
 
-  // Mostrar tela de login se não estiver autenticado
   if (!user) {
     return <Login onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        <Header user={user} onLogout={handleLogout} />
+    <div className="min-h-screen bg-dashboard-bg flex p-4 gap-6">
+      <Sidebar user={user} onLogout={handleLogout} />
+      
+      <main className="flex-1 flex flex-col max-w-[1600px] mx-auto w-full">
+        <Header user={user} />
         
-        <AnimatePresence mode="wait">
-          {!showResult ? (
-            <motion.div
-              key="form"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CopyForm onSubmit={handleGenerate} loading={loading} />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="result"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <CopyResult
-                dados={copyData.dados}
-                gancho={copyData.gancho}
-                corpo={copyData.corpo}
-                cta={copyData.cta}
-                estrategia={copyData.estrategia}
-                onVoltar={handleVoltar}
-                onVariacoes={handleVariacoes}
-                onCopiar={handleCopiar}
-                onExportar={handleExportar}
-              />
-              
-              {showVariations && (
-                <Variations
+        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+          <AnimatePresence mode="wait">
+            {!showResult ? (
+              <motion.div
+                key="form"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4 }}
+              >
+                <CopyForm onSubmit={handleGenerate} loading={loading} />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="result"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4 }}
+                className="space-y-6"
+              >
+                <CopyResult
                   dados={copyData.dados}
-                  onClose={() => setShowVariations(false)}
+                  gancho={copyData.gancho}
+                  corpo={copyData.corpo}
+                  cta={copyData.cta}
+                  estrategia={copyData.estrategia}
+                  onVoltar={handleVoltar}
+                  onVariacoes={handleVariacoes}
+                  onCopiar={handleCopiar}
+                  onExportar={handleExportar}
                 />
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+                
+                {showVariations && (
+                  <Variations
+                    dados={copyData.dados}
+                    onClose={() => setShowVariations(false)}
+                  />
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
         
         <Footer />
-      </div>
+      </main>
     </div>
   );
 }

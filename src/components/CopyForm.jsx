@@ -1,5 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  User, 
+  Briefcase, 
+  Target, 
+  Zap, 
+  Cpu, 
+  Layout, 
+  Clock, 
+  Type, 
+  Link as LinkIcon,
+  Sparkles
+} from 'lucide-react';
 
 export default function CopyForm({ onSubmit, loading = false }) {
   const [formData, setFormData] = useState({
@@ -33,287 +45,259 @@ export default function CopyForm({ onSubmit, loading = false }) {
 
   const isVideo = formData.plataforma.includes('video') || formData.plataforma === 'instagram-reels';
   const isImage = formData.plataforma === 'meta-ads-imagem' || formData.plataforma === 'google-ads-display';
-  const isGooglePesquisa = formData.plataforma === 'google-ads-pesquisa';
+
+  const inputGroupStyle = "glass-card p-6 space-y-4 border-white/5 hover:border-primary/20 transition-colors";
+  const labelStyle = "flex items-center gap-2 text-sm font-medium text-text-secondary mb-2";
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="bg-bg-card rounded-3xl p-8 shadow-2xl border border-border"
-    >
-      <h2 className="text-3xl font-bold mb-6 text-text-primary border-b-2 border-primary pb-3">
-        Parâmetros de Entrada
-      </h2>
+    <form onSubmit={handleSubmit} className="space-y-8 pb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Coluna 1: Dados do Negócio */}
+        <div className="space-y-6">
+          <div className={inputGroupStyle}>
+            <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
+              <Briefcase className="text-primary" size={20} />
+              Dados do Negócio
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className={labelStyle}><User size={16} /> Profissional</label>
+                <input
+                  type="text"
+                  name="nomeProfissional"
+                  value={formData.nomeProfissional}
+                  onChange={handleChange}
+                  required
+                  className="dashboard-input w-full"
+                  placeholder="Ex: Dr. João Silva"
+                />
+              </div>
+              <div>
+                <label className={labelStyle}><Clock size={16} /> Experiência (anos)</label>
+                <input
+                  type="number"
+                  name="anosExperiencia"
+                  value={formData.anosExperiencia}
+                  onChange={handleChange}
+                  required
+                  className="dashboard-input w-full"
+                  placeholder="Ex: 15"
+                />
+              </div>
+            </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Dados do Negócio */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="bg-bg-input/30 rounded-2xl p-6 border border-border"
-        >
-          <h3 className="text-xl font-semibold mb-4 text-primary">1. Dados do Negócio (OBRIGATÓRIO)</h3>
-          <div className="space-y-4">
             <div>
-              <label className="block mb-2 text-text-secondary font-medium">Nome/Especialidade do Profissional</label>
-              <input
-                type="text"
-                name="nomeProfissional"
-                value={formData.nomeProfissional}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 bg-bg-input border-2 border-border rounded-xl text-text-primary focus:outline-none focus:border-primary transition-colors"
-                placeholder="Ex: Dr. João Silva - Pediatra"
-              />
-            </div>
-            <div>
-              <label className="block mb-2 text-text-secondary font-medium">Anos de Experiência</label>
-              <input
-                type="number"
-                name="anosExperiencia"
-                value={formData.anosExperiencia}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 bg-bg-input border-2 border-border rounded-xl text-text-primary focus:outline-none focus:border-primary transition-colors"
-                placeholder="Ex: 15"
-              />
-            </div>
-            <div>
-              <label className="block mb-2 text-text-secondary font-medium">Resultados Comprovados</label>
+              <label className={labelStyle}><Target size={16} /> Resultados</label>
               <input
                 type="text"
                 name="resultadosComprovados"
                 value={formData.resultadosComprovados}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-bg-input border-2 border-border rounded-xl text-text-primary focus:outline-none focus:border-primary transition-colors"
+                className="dashboard-input w-full"
                 placeholder="Ex: 400+ pacientes curados"
               />
             </div>
+
             <div>
-              <label className="block mb-2 text-text-secondary font-medium">Diferencial Competitivo</label>
+              <label className={labelStyle}><Zap size={16} /> Diferencial</label>
               <textarea
                 name="diferencialCompetitivo"
                 value={formData.diferencialCompetitivo}
                 onChange={handleChange}
                 required
-                rows="3"
-                className="w-full px-4 py-3 bg-bg-input border-2 border-border rounded-xl text-text-primary focus:outline-none focus:border-primary transition-colors resize-y"
-                placeholder="Ex: Protocolo exclusivo baseado em evidências científicas"
+                rows="2"
+                className="dashboard-input w-full resize-none"
+                placeholder="Seu protocolo exclusivo..."
               />
             </div>
+
             <div>
-              <label className="block mb-2 text-text-secondary font-medium">Público-alvo Principal</label>
+              <label className={labelStyle}><User size={16} /> Público-alvo</label>
               <input
                 type="text"
                 name="publicoAlvo"
                 value={formData.publicoAlvo}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 bg-bg-input border-2 border-border rounded-xl text-text-primary focus:outline-none focus:border-primary transition-colors"
-                placeholder="Ex: Mães com filhos com APLV"
+                className="dashboard-input w-full"
+                placeholder="Ex: Mães com filhos APLV"
               />
             </div>
           </div>
-        </motion.div>
 
-        {/* Nível de Consciência */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="bg-bg-input/30 rounded-2xl p-6 border border-border"
-        >
-          <h3 className="text-xl font-semibold mb-4 text-primary">2. Nível de Consciência da Audiência (OBRIGATÓRIO)</h3>
-          <select
-            name="nivelConsciencia"
-            value={formData.nivelConsciencia}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 bg-bg-input border-2 border-border rounded-xl text-text-primary focus:outline-none focus:border-primary transition-colors"
-          >
-            <option value="">Selecione o nível...</option>
-            <option value="inconsciente">Inconsciente - Não sabe que tem o problema</option>
-            <option value="consciente-problema">Consciente do Problema - Sabe que tem o problema, mas não a solução</option>
-            <option value="consciente-solucao">Consciente da Solução - Sabe que existe solução, mas não a sua</option>
-            <option value="consciente-produto">Consciente do Produto - Conhece você ou seu produto</option>
-            <option value="totalmente-consciente">Totalmente Consciente - Já decidiu, só precisa do CTA</option>
-          </select>
-        </motion.div>
-
-        {/* Gatilho Psicológico */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="bg-bg-input/30 rounded-2xl p-6 border border-border"
-        >
-          <h3 className="text-xl font-semibold mb-4 text-primary">3. Gatilho Psicológico - Pecado Capital (OBRIGATÓRIO)</h3>
-          <select
-            name="pecadoCapital"
-            value={formData.pecadoCapital}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 bg-bg-input border-2 border-border rounded-xl text-text-primary focus:outline-none focus:border-primary transition-colors"
-          >
-            <option value="">Selecione o pecado capital...</option>
-            <option value="gula">Gula - Desejo insaciável</option>
-            <option value="avareza">Avareza - Medo da perda financeira</option>
-            <option value="luxuria">Luxúria - Desejo por prazer/conforto</option>
-            <option value="inveja">Inveja - Comparação social</option>
-            <option value="ira">Ira - Frustração/Indignação</option>
-            <option value="preguica">Preguiça - Busca por atalho/facilidade</option>
-            <option value="soberba">Soberba - Status/Exclusividade</option>
-          </select>
-        </motion.div>
-
-        {/* Metodologia */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="bg-bg-input/30 rounded-2xl p-6 border border-border"
-        >
-          <h3 className="text-xl font-semibold mb-4 text-primary">4. Metodologia Raiz (OBRIGATÓRIO)</h3>
-          <select
-            name="metodologia"
-            value={formData.metodologia}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 bg-bg-input border-2 border-border rounded-xl text-text-primary focus:outline-none focus:border-primary transition-colors"
-          >
-            <option value="">Selecione a metodologia...</option>
-            <option value="light-copy">Light Copy - Leandro Ladeira</option>
-            <option value="rmbc">RMBC - Stefan Georgi</option>
-            <option value="resposta-direta">Resposta Direta - Gary Halbert</option>
-            <option value="5-niveis">5 Níveis - Eugene Schwartz</option>
-          </select>
-        </motion.div>
-
-        {/* Plataforma */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="bg-bg-input/30 rounded-2xl p-6 border border-border"
-        >
-          <h3 className="text-xl font-semibold mb-4 text-primary">5. Plataforma e Formato (OBRIGATÓRIO)</h3>
-          <select
-            name="plataforma"
-            value={formData.plataforma}
-            onChange={handleChange}
-            required
-            className="w-full px-4 py-3 bg-bg-input border-2 border-border rounded-xl text-text-primary focus:outline-none focus:border-primary transition-colors"
-          >
-            <option value="">Selecione a plataforma...</option>
-            <option value="meta-ads-video">Meta Ads - Vídeo/Reels</option>
-            <option value="meta-ads-imagem">Meta Ads - Imagem/Estático</option>
-            <option value="google-ads-pesquisa">Google Ads - Pesquisa</option>
-            <option value="google-ads-video">Google Ads - Vídeo</option>
-            <option value="google-ads-display">Google Ads - Display</option>
-            <option value="instagram-reels">Instagram - Reels</option>
-          </select>
-        </motion.div>
-
-        {/* Especificações Técnicas */}
-        <AnimatePresence>
-          {formData.plataforma && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-bg-input/30 rounded-2xl p-6 border border-border overflow-hidden"
-            >
-              <h3 className="text-xl font-semibold mb-4 text-primary">6. Especificações Técnicas</h3>
-              {isVideo && (
-                <div>
-                  <label className="block mb-2 text-text-secondary font-medium">Duração Alvo (segundos)</label>
-                  <select
-                    name="duracao"
-                    value={formData.duracao}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 bg-bg-input border-2 border-border rounded-xl text-text-primary focus:outline-none focus:border-primary transition-colors"
-                  >
-                    <option value="15">15 segundos</option>
-                    <option value="30">30 segundos</option>
-                    <option value="60">60 segundos</option>
-                    {formData.plataforma === 'meta-ads-video' && <option value="90">90 segundos</option>}
-                  </select>
-                </div>
-              )}
-              {isImage && (
-                <div>
-                  <label className="block mb-2 text-text-secondary font-medium">Nível de Texto</label>
-                  <select
-                    name="densidade"
-                    value={formData.densidade}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 bg-bg-input border-2 border-border rounded-xl text-text-primary focus:outline-none focus:border-primary transition-colors"
-                  >
-                    <option value="minimalista">Minimalista</option>
-                    <option value="informativo">Informativo</option>
-                    <option value="carrossel">Carrossel</option>
-                  </select>
-                </div>
-              )}
-              {isGooglePesquisa && (
-                <div>
-                  <label className="block mb-2 text-text-secondary font-medium">URL Final</label>
-                  <input
-                    type="url"
-                    name="urlFinal"
-                    value={formData.urlFinal}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 bg-bg-input border-2 border-border rounded-xl text-text-primary focus:outline-none focus:border-primary transition-colors"
-                    placeholder="https://seusite.com.br"
-                  />
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Opção de usar IA */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="bg-bg-input/30 rounded-2xl p-6 border border-border"
-        >
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              id="usarIA"
-              name="usarIA"
-              checked={formData.usarIA}
-              onChange={handleChange}
-              className="w-5 h-5 text-primary bg-bg-input border-border rounded focus:ring-primary focus:ring-2"
-            />
-            <label htmlFor="usarIA" className="text-text-secondary font-medium cursor-pointer">
-              Usar Inteligência Artificial para melhorar a copy (OpenAI)
+          <div className={inputGroupStyle}>
+            <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
+              <Cpu className="text-primary" size={20} />
+              Inteligência Artificial
+            </h3>
+            <label className="flex items-center gap-3 cursor-pointer group">
+              <div className="relative">
+                <input
+                  type="checkbox"
+                  name="usarIA"
+                  checked={formData.usarIA}
+                  onChange={handleChange}
+                  className="sr-only"
+                />
+                <div className={`w-12 h-6 rounded-full transition-colors ${formData.usarIA ? 'bg-primary' : 'bg-white/10'}`}></div>
+                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${formData.usarIA ? 'translate-x-6' : ''}`}></div>
+              </div>
+              <span className="text-text-secondary group-hover:text-white transition-colors">Ativar geração com IA (GPT-4)</span>
             </label>
           </div>
-          <p className="text-sm text-text-muted mt-2 ml-8">
-            A IA irá gerar copies mais personalizadas e otimizadas baseadas nos seus parâmetros
-          </p>
-        </motion.div>
+        </div>
 
-        <motion.button
+        {/* Coluna 2: Estratégia e Formato */}
+        <div className="space-y-6">
+          <div className={inputGroupStyle}>
+            <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
+              <Target className="text-primary" size={20} />
+              Estratégia de Venda
+            </h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className={labelStyle}>Nível de Consciência</label>
+                <select
+                  name="nivelConsciencia"
+                  value={formData.nivelConsciencia}
+                  onChange={handleChange}
+                  required
+                  className="dashboard-input w-full appearance-none"
+                >
+                  <option value="">Selecione...</option>
+                  <option value="inconsciente">Inconsciente</option>
+                  <option value="consciente-problema">Consciente do Problema</option>
+                  <option value="consciente-solucao">Consciente da Solução</option>
+                  <option value="consciente-produto">Consciente do Produto</option>
+                  <option value="totalmente-consciente">Totalmente Consciente</option>
+                </select>
+              </div>
+
+              <div>
+                <label className={labelStyle}>Gatilho (Pecado Capital)</label>
+                <select
+                  name="pecadoCapital"
+                  value={formData.pecadoCapital}
+                  onChange={handleChange}
+                  required
+                  className="dashboard-input w-full appearance-none"
+                >
+                  <option value="">Selecione...</option>
+                  <option value="gula">Gula</option>
+                  <option value="avareza">Avareza</option>
+                  <option value="luxuria">Luxúria</option>
+                  <option value="inveja">Inveja</option>
+                  <option value="ira">Ira</option>
+                  <option value="preguica">Preguiça</option>
+                  <option value="soberba">Soberba</option>
+                </select>
+              </div>
+
+              <div>
+                <label className={labelStyle}>Metodologia Raiz</label>
+                <select
+                  name="metodologia"
+                  value={formData.metodologia}
+                  onChange={handleChange}
+                  required
+                  className="dashboard-input w-full appearance-none"
+                >
+                  <option value="">Selecione...</option>
+                  <option value="light-copy">Light Copy (Ladeira)</option>
+                  <option value="rmbc">RMBC (Georgi)</option>
+                  <option value="resposta-direta">Resposta Direta</option>
+                  <option value="5-niveis">5 Níveis (Schwartz)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div className={inputGroupStyle}>
+            <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
+              <Layout className="text-primary" size={20} />
+              Plataforma e Formato
+            </h3>
+            
+            <div className="space-y-4">
+              <select
+                name="plataforma"
+                value={formData.plataforma}
+                onChange={handleChange}
+                required
+                className="dashboard-input w-full appearance-none"
+              >
+                <option value="">Selecione a plataforma...</option>
+                <option value="meta-ads-video">Meta Ads - Vídeo</option>
+                <option value="meta-ads-imagem">Meta Ads - Imagem</option>
+                <option value="google-ads-pesquisa">Google Ads - Pesquisa</option>
+                <option value="instagram-reels">Instagram - Reels</option>
+              </select>
+
+              <AnimatePresence>
+                {isVideo && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <label className={labelStyle}><Clock size={16} /> Duração (segundos)</label>
+                    <select name="duracao" value={formData.duracao} onChange={handleChange} className="dashboard-input w-full">
+                      <option value="15">15s</option>
+                      <option value="30">30s</option>
+                      <option value="60">60s</option>
+                    </select>
+                  </motion.div>
+                )}
+                {isImage && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <label className={labelStyle}><Type size={16} /> Nível de Texto</label>
+                    <select name="densidade" value={formData.densidade} onChange={handleChange} className="dashboard-input w-full">
+                      <option value="minimalista">Minimalista</option>
+                      <option value="informativo">Informativo</option>
+                    </select>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div>
+                <label className={labelStyle}><LinkIcon size={16} /> URL Final</label>
+                <input
+                  type="url"
+                  name="urlFinal"
+                  value={formData.urlFinal}
+                  onChange={handleChange}
+                  className="dashboard-input w-full"
+                  placeholder="https://..."
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-center">
+        <button
           type="submit"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
           disabled={loading}
-          className="w-full py-4 px-6 bg-gradient-radial text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-primary flex items-center gap-3 px-12 py-4 text-lg"
         >
-          {loading ? 'Gerando com IA...' : 'Gerar Copy'}
-        </motion.button>
-      </form>
-    </motion.section>
+          {loading ? (
+            <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+          ) : (
+            <>
+              <Sparkles size={24} />
+              Gerar Copy de Elite
+            </>
+          )}
+        </button>
+      </div>
+    </form>
   );
 }

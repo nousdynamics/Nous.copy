@@ -7,38 +7,38 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        serif: ['Georgia', 'Times New Roman', 'serif'],
-        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'sans-serif'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       colors: {
         primary: {
-          DEFAULT: '#FD7D02', // Orange principal
+          DEFAULT: '#FD7D02',
           dark: '#C40B00',
-          darker: '#730100',
-          darkest: '#500100',
+          light: '#FF9D42',
         },
-        accent: {
-          DEFAULT: '#C40B00',
-          dark: '#730100',
-        },
-        bg: {
-          DEFAULT: '#000000', // Preto
-          card: '#1B1B1B',
-          input: '#1B1B1B',
-          secondary: '#484848',
-          darker: '#000000',
+        dashboard: {
+          bg: '#0A0A0A',
+          card: 'rgba(26, 26, 26, 0.6)',
+          sidebar: '#111111',
+          border: 'rgba(255, 255, 255, 0.1)',
+          accent: '#FD7D02',
         },
         text: {
           primary: '#FFFFFF',
-          secondary: '#CFCFCF',
-          muted: '#999999',
-        },
-        border: '#484848',
+          secondary: '#A1A1AA',
+          muted: '#71717A',
+        }
+      },
+      borderRadius: {
+        '3xl': '2rem',
+        '4xl': '2.5rem',
       },
       backgroundImage: {
-        'gradient-radial': 'radial-gradient(100% 100% at 50% 0%, #FD7D02 0%, #C40B00 36.54%, #730100 68.76%, #500100 100%)',
-        'gradient-text': 'linear-gradient(180deg, #FFFFFF 0%, #CFCFCF 100%)',
+        'dashboard-gradient': 'radial-gradient(circle at top right, rgba(253, 125, 2, 0.15), transparent), radial-gradient(circle at bottom left, rgba(196, 11, 0, 0.1), transparent)',
+        'glass-gradient': 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%)',
       },
+      boxShadow: {
+        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+      }
     },
   },
   plugins: [],
