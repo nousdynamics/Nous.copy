@@ -34,7 +34,7 @@
   }
 
   .dashboard-input {
-    @apply bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-primary/50 transition-all text-white placeholder:text-text-muted;
+    @apply bg-white/5 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:border-primary/50 transition-all text-white placeholder:text-text-muted text-sm;
   }
 
   .btn-primary {

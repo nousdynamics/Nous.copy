@@ -182,31 +182,33 @@ export default function CopyForm({ onSubmit, loading = false, prefilledData = nu
         icon={BlockIcon}
         defaultOpen={index === 0} // Primeiro bloco aberto por padrão
       >
-        {allFields.map(field => {
-          const fieldConfig = getFieldById(field.id) || field;
-          const isRequired = templateManager ? templateManager.isFieldRequired(field.id) : false;
-          const isLocked = templateManager ? templateManager.isFieldLocked(field.id) : false;
-          const fieldError = errors[field.id];
-          
-          return (
-            <div key={field.id}>
-              <DynamicFormField
-                field={fieldConfig}
-                value={formData[field.id]}
-                onChange={handleFieldChange}
-                required={isRequired}
-                locked={isLocked}
-                templateManager={templateManager}
-              />
-              {fieldError && (
-                <div className="flex items-center gap-1 mt-1 text-xs text-red-400">
-                  <AlertCircle size={12} />
-                  <span>{fieldError}</span>
-                </div>
-              )}
-            </div>
-          );
-        })}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {allFields.map(field => {
+            const fieldConfig = getFieldById(field.id) || field;
+            const isRequired = templateManager ? templateManager.isFieldRequired(field.id) : false;
+            const isLocked = templateManager ? templateManager.isFieldLocked(field.id) : false;
+            const fieldError = errors[field.id];
+            
+            return (
+              <div key={field.id}>
+                <DynamicFormField
+                  field={fieldConfig}
+                  value={formData[field.id]}
+                  onChange={handleFieldChange}
+                  required={isRequired}
+                  locked={isLocked}
+                  templateManager={templateManager}
+                />
+                {fieldError && (
+                  <div className="flex items-center gap-1 mt-1 text-xs text-red-400">
+                    <AlertCircle size={12} />
+                    <span>{fieldError}</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </AccordionCard>
     );
   };
@@ -214,7 +216,7 @@ export default function CopyForm({ onSubmit, loading = false, prefilledData = nu
   const visibleBlocks = getVisibleBlocks();
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="space-y-6 pb-10">
       {/* Informações do Template Ativo */}
       {(templateManager?.systemTemplateId || templateManager?.userTemplate) && (
         <motion.div
@@ -256,7 +258,7 @@ export default function CopyForm({ onSubmit, loading = false, prefilledData = nu
         </motion.div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-4">
           {visibleBlocks.map((blockId, index) => renderBlock(blockId, index))}
         </div>

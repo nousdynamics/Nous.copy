@@ -5,8 +5,8 @@ export default function DynamicFormField({ field, value, onChange, required = fa
   const fieldId = field.id;
   const fieldType = field.tipo;
   
-  const baseInputClasses = `dashboard-input w-full ${locked ? 'bg-white/5 cursor-not-allowed opacity-60' : ''}`;
-  const labelClasses = `flex items-center gap-2 text-sm font-medium ${required ? 'text-white' : 'text-text-secondary'} mb-2`;
+  const baseInputClasses = `dashboard-input w-full text-sm ${locked ? 'bg-white/5 cursor-not-allowed opacity-60' : ''}`;
+  const labelClasses = `flex items-center gap-1.5 text-xs font-medium ${required ? 'text-white' : 'text-text-secondary'} mb-1.5`;
   
   const handleChange = (e) => {
     if (locked) return;
@@ -25,7 +25,7 @@ export default function DynamicFormField({ field, value, onChange, required = fa
       return (
         <div>
           <label className={labelClasses}>
-            {locked && <Lock size={14} className="text-text-muted" />}
+            {locked && <Lock size={12} className="text-text-muted" />}
             {field.label}
             {required && <span className="text-primary">*</span>}
           </label>
@@ -36,7 +36,7 @@ export default function DynamicFormField({ field, value, onChange, required = fa
             onChange={handleChange}
             required={required}
             disabled={locked}
-            className={baseInputClasses}
+            className={`${baseInputClasses} py-2`}
             placeholder={field.placeholder || ''}
           />
         </div>
@@ -46,7 +46,7 @@ export default function DynamicFormField({ field, value, onChange, required = fa
       return (
         <div>
           <label className={labelClasses}>
-            {locked && <Lock size={14} className="text-text-muted" />}
+            {locked && <Lock size={12} className="text-text-muted" />}
             {field.label}
             {required && <span className="text-primary">*</span>}
           </label>
@@ -57,7 +57,7 @@ export default function DynamicFormField({ field, value, onChange, required = fa
             required={required}
             disabled={locked}
             rows={field.rows || 3}
-            className={`${baseInputClasses} resize-none`}
+            className={`${baseInputClasses} resize-none py-2`}
             placeholder={field.placeholder || ''}
           />
         </div>
@@ -67,7 +67,7 @@ export default function DynamicFormField({ field, value, onChange, required = fa
       return (
         <div>
           <label className={labelClasses}>
-            {locked && <Lock size={14} className="text-text-muted" />}
+            {locked && <Lock size={12} className="text-text-muted" />}
             {field.label}
             {required && <span className="text-primary">*</span>}
           </label>
@@ -78,7 +78,7 @@ export default function DynamicFormField({ field, value, onChange, required = fa
             onChange={handleChange}
             required={required}
             disabled={locked}
-            className={baseInputClasses}
+            className={`${baseInputClasses} py-2`}
             placeholder={field.placeholder || ''}
           />
         </div>
@@ -88,7 +88,7 @@ export default function DynamicFormField({ field, value, onChange, required = fa
       return (
         <div>
           <label className={labelClasses}>
-            {locked && <Lock size={14} className="text-text-muted" />}
+            {locked && <Lock size={12} className="text-text-muted" />}
             {field.label}
             {required && <span className="text-primary">*</span>}
           </label>
@@ -98,7 +98,7 @@ export default function DynamicFormField({ field, value, onChange, required = fa
             onChange={handleChange}
             required={required}
             disabled={locked}
-            className={`${baseInputClasses} appearance-none`}
+            className={`${baseInputClasses} appearance-none py-2`}
           >
             <option value="">Selecione...</option>
             {field.opcoes?.map((opcao) => (
@@ -114,7 +114,7 @@ export default function DynamicFormField({ field, value, onChange, required = fa
       return (
         <div>
           <label className={labelClasses}>
-            {locked && <Lock size={14} className="text-text-muted" />}
+            {locked && <Lock size={12} className="text-text-muted" />}
             {field.label}
             {required && <span className="text-primary">*</span>}
           </label>
@@ -131,7 +131,7 @@ export default function DynamicFormField({ field, value, onChange, required = fa
             }}
             required={required}
             disabled={locked}
-            className={`${baseInputClasses} appearance-none min-h-[100px]`}
+            className={`${baseInputClasses} appearance-none min-h-[80px] py-2`}
           >
             {field.opcoes?.map((opcao) => (
               <option key={opcao.value} value={opcao.value}>

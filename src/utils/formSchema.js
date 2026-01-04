@@ -28,7 +28,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXT,
     bloco: FORM_BLOCKS.DADOS_NEGOCIO,
     ordem: 1,
-    placeholder: 'Ex.: Dr. João Silva'
+    placeholder: 'Ex: Dr. João Silva'
   },
   {
     id: 'profissional_cargo',
@@ -36,7 +36,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXT,
     bloco: FORM_BLOCKS.DADOS_NEGOCIO,
     ordem: 2,
-    placeholder: 'Ex.: Nutrólogo, Consultor de Marketing'
+    placeholder: 'Ex: Nutrólogo'
   },
   {
     id: 'negocio_nome',
@@ -44,7 +44,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXT,
     bloco: FORM_BLOCKS.DADOS_NEGOCIO,
     ordem: 3,
-    placeholder: 'Ex.: Clínica Vida Plena'
+    placeholder: 'Ex: Clínica Vida Plena'
   },
   {
     id: 'segmento_atuacao',
@@ -52,7 +52,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXT,
     bloco: FORM_BLOCKS.DADOS_NEGOCIO,
     ordem: 4,
-    placeholder: 'Ex.: Saúde infantil, Marketing digital'
+    placeholder: 'Ex: Saúde infantil'
   },
   {
     id: 'tempo_experiencia',
@@ -60,7 +60,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXT,
     bloco: FORM_BLOCKS.DADOS_NEGOCIO,
     ordem: 5,
-    placeholder: 'Ex.: 15 anos de experiência em...'
+    placeholder: 'Ex: 15 anos'
   },
   {
     id: 'resultado_principal',
@@ -68,7 +68,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXT,
     bloco: FORM_BLOCKS.DADOS_NEGOCIO,
     ordem: 6,
-    placeholder: 'Ex.: Mais de 400 pacientes curados'
+    placeholder: 'Ex: 400+ pacientes'
   },
   {
     id: 'provas_sociais',
@@ -76,7 +76,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXTAREA,
     bloco: FORM_BLOCKS.DADOS_NEGOCIO,
     ordem: 7,
-    placeholder: 'Ex.: +50 empresas atendidas; 10k alunos; 4.9/5 no Google'
+    placeholder: 'Ex: 50+ clientes, 4.9 estrelas'
   },
   {
     id: 'diferencial',
@@ -84,7 +84,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXTAREA,
     bloco: FORM_BLOCKS.DADOS_NEGOCIO,
     ordem: 8,
-    placeholder: 'Seu protocolo exclusivo...'
+    placeholder: 'Ex: Método exclusivo de tratamento'
   },
   
   // Bloco: Público-Alvo
@@ -94,7 +94,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXT,
     bloco: FORM_BLOCKS.PUBLICO_ALVO,
     ordem: 1,
-    placeholder: 'Ex.: Mães com filhos APLV de 0 a 5 anos'
+    placeholder: 'Ex: Mães com filhos APLV'
   },
   {
     id: 'publico_idade',
@@ -102,7 +102,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXT,
     bloco: FORM_BLOCKS.PUBLICO_ALVO,
     ordem: 2,
-    placeholder: 'Ex.: 25 a 40 anos'
+    placeholder: 'Ex: 25-40 anos'
   },
   {
     id: 'publico_localizacao',
@@ -110,7 +110,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXT,
     bloco: FORM_BLOCKS.PUBLICO_ALVO,
     ordem: 3,
-    placeholder: 'Ex.: Brasil, SP Capital'
+    placeholder: 'Ex: São Paulo, SP'
   },
   {
     id: 'nivel_consciencia',
@@ -132,7 +132,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXT,
     bloco: FORM_BLOCKS.PUBLICO_ALVO,
     ordem: 5,
-    placeholder: 'Descreva a principal dor do público'
+    placeholder: 'Ex: Falta de tempo'
   },
   {
     id: 'outras_dores',
@@ -140,7 +140,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXTAREA,
     bloco: FORM_BLOCKS.PUBLICO_ALVO,
     ordem: 6,
-    placeholder: 'Liste 2-3 outras dores relevantes'
+    placeholder: 'Ex: Alto custo, complexidade'
   },
   {
     id: 'principais_desejos',
@@ -148,7 +148,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXTAREA,
     bloco: FORM_BLOCKS.PUBLICO_ALVO,
     ordem: 7,
-    placeholder: 'O que o público mais deseja alcançar?'
+    placeholder: 'Ex: Mais qualidade de vida'
   },
   {
     id: 'objecoes_comuns',
@@ -156,7 +156,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXTAREA,
     bloco: FORM_BLOCKS.PUBLICO_ALVO,
     ordem: 8,
-    placeholder: 'Preço, tempo, confiança, etc.'
+    placeholder: 'Ex: Preço, confiança'
   },
   
   // Bloco: Oferta
@@ -166,7 +166,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXT,
     bloco: FORM_BLOCKS.OFERTA,
     ordem: 1,
-    placeholder: 'Nome do produto ou oferta'
+    placeholder: 'Ex: Curso Completo de Marketing'
   },
   {
     id: 'oferta_tipo',
@@ -189,7 +189,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXTAREA,
     bloco: FORM_BLOCKS.OFERTA,
     ordem: 3,
-    placeholder: 'Descrição breve do que é a oferta'
+    placeholder: 'Ex: Curso online com 10 módulos'
   },
   {
     id: 'oferta_conteudo_principal',
@@ -197,7 +197,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXTAREA,
     bloco: FORM_BLOCKS.OFERTA,
     ordem: 4,
-    placeholder: 'Módulos, entregáveis principais'
+    placeholder: 'Ex: 10 módulos, certificado'
   },
   {
     id: 'oferta_bonuses',
@@ -205,7 +205,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXTAREA,
     bloco: FORM_BLOCKS.OFERTA,
     ordem: 5,
-    placeholder: 'Liste os bônus incluídos (um por linha)'
+    placeholder: 'Ex: Bônus 1, Bônus 2'
   },
   {
     id: 'oferta_preco_principal',
@@ -213,7 +213,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXT,
     bloco: FORM_BLOCKS.OFERTA,
     ordem: 6,
-    placeholder: 'Ex.: R$ 997'
+    placeholder: 'Ex: R$ 997'
   },
   {
     id: 'oferta_condicoes_pagamento',
@@ -221,7 +221,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXT,
     bloco: FORM_BLOCKS.OFERTA,
     ordem: 7,
-    placeholder: 'Parcelamento, forma de pagamento'
+    placeholder: 'Ex: 12x sem juros'
   },
   {
     id: 'oferta_garantia_tipo',
@@ -243,7 +243,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXTAREA,
     bloco: FORM_BLOCKS.OFERTA,
     ordem: 9,
-    placeholder: 'Texto completo da garantia'
+    placeholder: 'Ex: 7 dias de garantia incondicional'
   },
   {
     id: 'oferta_urgencia_ou_escassez',
@@ -373,7 +373,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXT,
     bloco: FORM_BLOCKS.ESTRATEGIA_VENDA,
     ordem: 8,
-    placeholder: 'CTA secundária opcional'
+    placeholder: 'Ex: Saiba mais'
   },
   
   // Bloco: Configurações de Copy
@@ -477,7 +477,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXTAREA,
     bloco: FORM_BLOCKS.CONFIGURACOES_COPY,
     ordem: 8,
-    placeholder: 'Liste palavras-chave obrigatórias (separadas por vírgula)'
+    placeholder: 'Ex: garantido, comprovado'
   },
   {
     id: 'palavras_que_devem_ser_evitas',
@@ -485,7 +485,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.TEXTAREA,
     bloco: FORM_BLOCKS.CONFIGURACOES_COPY,
     ordem: 9,
-    placeholder: 'Liste palavras que devem ser evitadas (separadas por vírgula)'
+    placeholder: 'Ex: nunca, sempre'
   }
 ];
 
