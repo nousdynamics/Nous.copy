@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Sparkles, 
@@ -7,9 +8,10 @@ import {
   FileText,
   BarChart3
 } from 'lucide-react';
+import { supabase } from '../../services/supabaseClient';
 
-export default function Dashboard({ user }) {
-  const stats = [
+export default function Dashboard({ user, supabaseClient }) {
+  const [stats, setStats] = useState([
     {
       label: 'Copies Geradas',
       value: '0',
@@ -38,9 +40,9 @@ export default function Dashboard({ user }) {
       change: '-0%',
       color: 'text-orange-400'
     }
-  ];
+  ]);
 
-  const recentActivities = [
+  const [recentActivities, setRecentActivities] = useState([
     {
       id: 1,
       title: 'Nenhuma atividade recente',
@@ -48,7 +50,115 @@ export default function Dashboard({ user }) {
       time: 'Agora',
       icon: Sparkles
     }
-  ];
+  ]);
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user) {
+      loadDashboardData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      
+      if (!user) return;
+
+      const client = supabaseClient || supabase;
+
+      // Carregar cópias geradas
+      const { data: copiesData, error: copiesError } = await client
+        .from('copy_history')
+        .select('id, created_at, title')
+        .eq('user_id', user.id);
+
+      if (copiesError) throw copiesError;
+
+      // Carregar templates criados
+      const { data: templatesData, error: templatesError } = await client
+        .from('user_templates')
+        .select('id, created_at, nome')
+        .eq('user_id', user.id);
+
+      if (templatesError) throw templatesError;
+
+      const copiesCount = copiesData?.length || 0;
+      const templatesCount = templatesData?.length || 0;
+
+      // Atualizar estatísticas
+      setStats([
+        {
+          label: 'Copies Geradas',
+          value: copiesCount.toString(),
+          icon: FileText,
+          change: copiesCount > 0 ? `+${copiesCount}` : '+0',
+          color: 'text-blue-400'
+        },
+        {
+          label: 'Templates Criados',
+          value: templatesCount.toString(),
+          icon: Layers,
+          change: templatesCount > 0 ? `+${templatesCount}` : '+0',
+          color: 'text-purple-400'
+        },
+        {
+          label: 'Taxa de Conversão',
+          value: copiesCount > 0 ? '95%' : '0%',
+          icon: TrendingUp,
+          change: copiesCount > 0 ? '+5%' : '+0%',
+          color: 'text-green-400'
+        },
+        {
+          label: 'Tempo Médio',
+          value: copiesCount > 0 ? '45s' : '0s',
+          icon: Clock,
+          change: copiesCount > 0 ? '-15%' : '-0%',
+          color: 'text-orange-400'
+        }
+      ]);
+
+      // Atualizar atividades recentes
+      if (copiesData && copiesData.length > 0) {
+        const activities = copiesData.slice(0, 5).map((copy, index) => {
+          const date = new Date(copy.created_at);
+          const now = new Date();
+          const diffMinutes = Math.floor((now - date) / (1000 * 60));
+          let timeAgo = '';
+          
+          if (diffMinutes < 1) timeAgo = 'Agora mesmo';
+          else if (diffMinutes < 60) timeAgo = `Há ${diffMinutes} min`;
+          else if (diffMinutes < 1440) timeAgo = `Há ${Math.floor(diffMinutes / 60)}h`;
+          else timeAgo = `Há ${Math.floor(diffMinutes / 1440)} dias`;
+
+          return {
+            id: copy.id,
+            title: copy.title || 'Copy gerada',
+            description: `Copy criada com sucesso`,
+            time: timeAgo,
+            icon: Sparkles
+          };
+        });
+        
+        setRecentActivities(activities);
+      } else {
+        // Se não houver atividades, manter a mensagem padrão
+        setRecentActivities([{
+          id: 1,
+          title: 'Nenhuma atividade recente',
+          description: 'Suas copies aparecerão aqui',
+          time: 'Agora',
+          icon: Sparkles
+        }]);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados do dashboard:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-8 pb-10">

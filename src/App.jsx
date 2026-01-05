@@ -344,7 +344,7 @@ function App() {
 
   const renderContent = () => {
     switch(activeTab) {
-      case 'dashboard': return <Dashboard user={user} />;
+      case 'dashboard': return <Dashboard key={`dashboard-${user?.id}`} user={user} supabaseClient={supabase} />;
       case 'generator': return (
         <AnimatePresence mode="wait">
           {!showResult ? (
@@ -417,7 +417,8 @@ function App() {
         setActiveTab('generator');
       }} />;
       case 'profile': return <Profile user={user} />;
-      default: return <Dashboard user={user} />;
+      case 'dashboard': return <Dashboard key={`dashboard-${user?.id}`} user={user} supabaseClient={supabase} />;
+      default: return <Dashboard key={`dashboard-${user?.id}`} user={user} supabaseClient={supabase} />;
     }
   };
 
