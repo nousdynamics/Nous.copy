@@ -104,14 +104,46 @@ export default function AgentCopyForm({
   };
 
   const handleFieldChange = (fieldId, value) => {
-    setFormData(prev => ({ 
-      ...prev, 
-      [fieldId]: value 
-    }));
+    setFormData(prev => {
+      const updated = { 
+        ...prev, 
+        [fieldId]: value 
+      };
+      
+      // Quando formato_criativo muda, limpar campos condicionais que não se aplicam
+      if (fieldId === 'formato_criativo') {
+        if (value !== 'video_curto') {
+          // Se não for vídeo, remover duracao_video
+          delete updated.duracao_video;
+        }
+        if (!['arte_estatica', 'carrossel'].includes(value)) {
+          // Se não for arte estática ou carrossel, remover tamanho_texto_arte
+          delete updated.tamanho_texto_arte;
+        }
+      }
+      
+      return updated;
+    });
+    
+    // Limpar erro deste campo
     if (errors[fieldId]) {
       setErrors(prev => {
         const newErrors = { ...prev };
         delete newErrors[fieldId];
+        return newErrors;
+      });
+    }
+    
+    // Se mudou o formato, limpar erros de campos condicionais que não se aplicam mais
+    if (fieldId === 'formato_criativo') {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        if (value !== 'video_curto') {
+          delete newErrors.duracao_video;
+        }
+        if (!['arte_estatica', 'carrossel'].includes(value)) {
+          delete newErrors.tamanho_texto_arte;
+        }
         return newErrors;
       });
     }
@@ -131,11 +163,27 @@ export default function AgentCopyForm({
     
     // Validação padrão para outros agentes
     agent.fields.forEach(fieldId => {
+      // Pular campos condicionais que não se aplicam ao formato selecionado
+      if (fieldId === 'duracao_video' && formData.formato_criativo && formData.formato_criativo !== 'video_curto') {
+        return; // Não validar se não for vídeo curto
+      }
+      if (fieldId === 'tamanho_texto_arte' && formData.formato_criativo && !['arte_estatica', 'carrossel'].includes(formData.formato_criativo)) {
+        return; // Não validar se não for arte estática ou carrossel
+      }
+      
       const field = getFieldById(fieldId);
       if (field) {
         // Campos select vazios são considerados inválidos se não tiverem valor padrão
+        // EXCETO se forem opcionais (gatilho_principal pode ser "nenhum")
         if (field.tipo === 'select' && !formData[fieldId]) {
-          newErrors[fieldId] = `${field.label} é obrigatório`;
+          // Se o campo tiver defaultValue, não é obrigatório
+          if (field.defaultValue !== undefined && field.defaultValue !== '') {
+            // Tem valor padrão, não é obrigatório
+          } else if (fieldId === 'gatilho_principal' && field.defaultValue === 'nenhum') {
+            // Gatilho principal pode ser "nenhum", não é obrigatório
+          } else {
+            newErrors[fieldId] = `${field.label} é obrigatório`;
+          }
         }
         // Para outros campos, verificar se estão vazios
         else if (field.tipo !== 'select' && field.tipo !== 'multiselect') {
@@ -150,6 +198,16 @@ export default function AgentCopyForm({
         }
       }
     });
+    
+    // Validação específica: se formato_criativo for video_curto, duracao_video é obrigatório
+    if (formData.formato_criativo === 'video_curto' && !formData.duracao_video) {
+      newErrors.duracao_video = 'Duração do vídeo é obrigatória quando o formato é vídeo';
+    }
+    
+    // Validação específica: se formato_criativo for arte_estatica ou carrossel, tamanho_texto_arte é obrigatório
+    if (['arte_estatica', 'carrossel'].includes(formData.formato_criativo) && !formData.tamanho_texto_arte) {
+      newErrors.tamanho_texto_arte = 'Tamanho do texto na arte é obrigatório quando o formato é arte estática ou carrossel';
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

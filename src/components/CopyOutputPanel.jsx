@@ -63,9 +63,9 @@ export default function CopyOutputPanel({ copies, agentName, loading }) {
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col min-h-0">
       {/* Header */}
-      <div className="mb-6 pb-4 border-b border-white/10">
+      <div className="mb-6 pb-4 border-b border-white/10 flex-shrink-0">
         <h3 className="text-xl font-bold text-white mb-1">Output</h3>
         <p className="text-sm text-text-secondary">
           {copies.length} {copies.length === 1 ? 'Copy gerada' : 'Copies geradas'}
@@ -73,7 +73,7 @@ export default function CopyOutputPanel({ copies, agentName, loading }) {
       </div>
 
       {/* Lista de Copies */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4">
+      <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4 min-h-0 pb-4">
         <AnimatePresence>
           {copies.map((copy, index) => {
             const isExpanded = expandedIndex === index;
@@ -170,9 +170,11 @@ export default function CopyOutputPanel({ copies, agentName, loading }) {
                               )}
                             </button>
                           </div>
-                          <p className="text-sm text-white leading-relaxed pl-11 pr-8">
-                            {copy.gancho}
-                          </p>
+                          <div className="pl-11 pr-8 max-h-none overflow-y-auto custom-scrollbar">
+                            <p className="text-sm text-white leading-relaxed whitespace-pre-wrap break-words">
+                              {copy.gancho}
+                            </p>
+                          </div>
                         </div>
 
                         {/* Corpo - só mostrar se houver */}
@@ -203,18 +205,20 @@ export default function CopyOutputPanel({ copies, agentName, loading }) {
                               )}
                             </button>
                           </div>
-                          <div className="pl-11 pr-8 space-y-3">
-                            {copy.corpo.split('\n\n').filter(p => p.trim()).length > 0 ? (
-                              copy.corpo.split('\n\n').filter(p => p.trim()).map((paragraph, pIndex) => (
-                                <p key={pIndex} className="text-sm text-text-secondary leading-relaxed">
-                                  {paragraph.trim()}
+                          <div className="pl-11 pr-8">
+                            <div className="space-y-3 max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
+                              {copy.corpo.split('\n\n').filter(p => p.trim()).length > 1 ? (
+                                copy.corpo.split('\n\n').filter(p => p.trim()).map((paragraph, pIndex) => (
+                                  <p key={pIndex} className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap break-words">
+                                    {paragraph.trim()}
+                                  </p>
+                                ))
+                              ) : (
+                                <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap break-words">
+                                  {copy.corpo}
                                 </p>
-                              ))
-                            ) : (
-                              <p className="text-sm text-text-secondary leading-relaxed">
-                                {copy.corpo}
-                              </p>
-                            )}
+                              )}
+                            </div>
                           </div>
                         </div>
                         )}
@@ -247,9 +251,11 @@ export default function CopyOutputPanel({ copies, agentName, loading }) {
                               )}
                             </button>
                           </div>
-                          <p className="text-sm font-medium text-white leading-relaxed pl-11 pr-8">
-                            {copy.cta}
-                          </p>
+                          <div className="pl-11 pr-8 max-h-none overflow-y-auto custom-scrollbar">
+                            <p className="text-sm font-medium text-white leading-relaxed whitespace-pre-wrap break-words">
+                              {copy.cta}
+                            </p>
+                          </div>
                         </div>
                         )}
                       </div>
