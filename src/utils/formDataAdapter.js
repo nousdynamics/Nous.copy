@@ -12,7 +12,7 @@ export function adaptFormDataToLegacy(formData) {
     nivelConsciencia: mapNivelConsciencia(formData.nivel_consciencia),
     pecadoCapital: mapGatilhoPrincipal(formData.gatilho_principal),
     metodologia: formData.metodologia_base || '',
-    plataforma: mapCanalPrincipal(formData.canal_principal),
+    plataforma: mapCanalPrincipal(formData.canal_principal) || formData.canal_principal || '',
     duracao: formData.duracao_vsl ? (parseInt(formData.duracao_vsl) * 60).toString() : (formData.vsl_duracao_minutos ? (parseInt(formData.vsl_duracao_minutos) * 60).toString() : '30'),
     densidade: formData.estilo_linguagem === 'simples_direto' ? 'informativo' : 'minimalista',
     urlFinal: formData.cta_principal === 'clicar_link' ? '' : '',

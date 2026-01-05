@@ -78,7 +78,9 @@ function App() {
   };
 
   const handleGenerate = async (formData, showLoading = true, agentId = null) => {
-    if (showLoading) {
+    // Quando usado pelo AgentCopyForm, não mostrar loading global (já tem loading no painel)
+    // Apenas mostrar loading se showLoading for true E não tiver agentId (sistema antigo)
+    if (showLoading && !agentId) {
       setLoading(true);
     }
     try {
@@ -118,7 +120,8 @@ function App() {
           geradoComIA: true
         };
         
-        if (showLoading) {
+        // Apenas atualizar estado global se não for do AgentCopyForm (sistema antigo)
+        if (showLoading && !agentId) {
           setCopyData(copyResult);
           setShowResult(true);
           setShowVariations(false);
@@ -161,16 +164,70 @@ function App() {
       const estrategia = analiseEstrategica(formData);
       let gancho, corpo, cta;
       
-      // Sempre tentar usar IA primeiro
+      // Determinar formato e usar geradores específicos
+      // Mapear valores de canal_principal para formato correto
+      const canalValue = formData.canal_principal || formData.plataforma || '';
+      let formato = 'anuncio_meta_ads'; // padrão
+      
+      // Mapear valores do select para formatos
+      const formatoMap = {
+        'vsl': 'vsl',
+        'pagina_vendas': 'pagina_vendas',
+        'anuncio_meta_ads': 'anuncio_meta_ads',
+        'sequencia_emails': 'sequencia_emails',
+        'post_redes_sociais': 'post_redes_sociais',
+        'roteiro_video_curto': 'roteiro_video_curto',
+        'titulos_google_ads': 'titulos_google_ads',
+        // Mapeamentos legados
+        'meta-ads': 'anuncio_meta_ads',
+        'meta-ads-imagem': 'anuncio_meta_ads',
+        'meta-ads-video': 'vsl',
+        'google-ads-pesquisa': 'titulos_google_ads',
+        'instagram-reels': 'post_redes_sociais'
+      };
+      
+      if (canalValue) {
+        formato = formatoMap[canalValue] || formatoMap[formData.plataforma] || 'anuncio_meta_ads';
+      }
+      
+      // Se tiver agentId, usar características específicas do agente
+      const finalAgentId = agentId || formData.agentId || null;
+      
+      // Sempre tentar usar IA primeiro com formatos específicos
       try {
-        gancho = await gerarGanchoIA(formData, estrategia);
-        corpo = await gerarCorpoIA(formData, estrategia, gancho);
-        cta = await gerarCTAIA(formData, estrategia);
+        // Importar geradores específicos por formato e características dos agentes
+        const { 
+          gerarGanchoPorFormato, 
+          gerarCorpoPorFormato, 
+          gerarCTAPorFormato,
+          AGENT_CHARACTERISTICS
+        } = await import('./services/formatSpecificGenerator');
+        
+        const agentChar = AGENT_CHARACTERISTICS[finalAgentId] || AGENT_CHARACTERISTICS['criativo'];
+        
+        // Gerar gancho sempre
+        gancho = await gerarGanchoPorFormato(formData, estrategia, formato, finalAgentId);
+        
+        // Se o agente for "ganchos", gerar apenas gancho (sem corpo e CTA)
+        if (finalAgentId === 'ganchos' || agentChar.generateOnlyHook) {
+          corpo = '';
+          cta = '';
+        } else {
+          // Gerar corpo e CTA para outros agentes
+          corpo = await gerarCorpoPorFormato(formData, estrategia, gancho, formato, finalAgentId);
+          cta = await gerarCTAPorFormato(formData, estrategia, formato, finalAgentId);
+        }
       } catch (error) {
         console.error('Erro ao gerar copy com IA:', error);
-        // Não usar fallback - mostrar erro claro para o usuário
-        const errorMessage = error.message || 'Erro desconhecido ao gerar copy';
-        throw new Error(`Erro ao gerar copy: ${errorMessage}`);
+        // Fallback para funções genéricas se der erro
+        try {
+          gancho = await gerarGanchoIA(formData, estrategia);
+          corpo = await gerarCorpoIA(formData, estrategia, gancho);
+          cta = await gerarCTAIA(formData, estrategia);
+        } catch (fallbackError) {
+          const errorMessage = error.message || 'Erro desconhecido ao gerar copy';
+          throw new Error(`Erro ao gerar copy: ${errorMessage}`);
+        }
       }
       
       if (formData.duracao) {
@@ -194,8 +251,8 @@ function App() {
         geradoComIA: true
       };
       
-      // Se showLoading, atualizar estado para modo antigo (compatibilidade)
-      if (showLoading) {
+      // Apenas atualizar estado global se não for do AgentCopyForm (sistema antigo)
+      if (showLoading && !agentId) {
         setCopyData(copyResult);
         setShowResult(true);
         setShowVariations(false);
@@ -250,7 +307,8 @@ function App() {
       }
       throw error;
     } finally {
-      if (showLoading) {
+      // Apenas desabilitar loading global se não for do AgentCopyForm
+      if (showLoading && !agentId) {
         setLoading(false);
       }
     }

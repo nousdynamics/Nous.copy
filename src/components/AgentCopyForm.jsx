@@ -55,6 +55,7 @@ export default function AgentCopyForm({
   const [showCreateTemplateModal, setShowCreateTemplateModal] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [generatedCopies, setGeneratedCopies] = useState([]);
+  const [isGenerating, setIsGenerating] = useState(false); // Estado local de loading
 
   // Organizar campos por bloco
   const organizeFieldsByBlock = () => {
@@ -160,28 +161,52 @@ export default function AgentCopyForm({
       return;
     }
     
+    // Limpar copies anteriores e definir loading
+    setGeneratedCopies([]);
+    setIsGenerating(true);
+    
     try {
       // Para estrutura invisível, usar formData diretamente (não adaptar)
-      const dataToSubmit = agent.id === 'estrutura_invisivel' ? formData : adaptFormDataToLegacy(formData);
+      let dataToSubmit;
+      if (agent.id === 'estrutura_invisivel') {
+        dataToSubmit = formData;
+      } else {
+        // Adaptar para formato legado, mas preservar canal_principal
+        dataToSubmit = adaptFormDataToLegacy(formData);
+        // Garantir que canal_principal esteja presente (é necessário para geradores por formato)
+        if (formData.canal_principal && !dataToSubmit.canal_principal) {
+          dataToSubmit.canal_principal = formData.canal_principal;
+        }
+        // Garantir que agentId seja preservado
+        dataToSubmit.agentId = agent.id;
+      }
       console.log('Dados enviados para geração:', dataToSubmit);
       
-      // Gerar múltiplas copies
+      // Gerar múltiplas copies sequencialmente
       const copies = [];
       for (let i = 0; i < quantity; i++) {
         try {
-          const result = await onSubmit(dataToSubmit, i === 0, agent.id); // Passa o agent.id
-          if (result) {
+          // Passar showLoading apenas para a primeira para não interferir com estado global
+          // agent.id é passado para que handleGenerate saiba que é do AgentCopyForm
+          const result = await onSubmit(dataToSubmit, i === 0, agent.id);
+          console.log(`Copy ${i + 1} gerada:`, result);
+          if (result && result.gancho && result.corpo && result.cta) {
             copies.push(result);
+            // Atualizar estado a cada copy gerada para mostrar progresso
+            setGeneratedCopies([...copies]);
           }
         } catch (err) {
           console.error(`Erro ao gerar copy ${i + 1}:`, err);
+          // Continuar gerando outras copies mesmo se uma falhar
         }
       }
       
-      setGeneratedCopies(copies);
-      
-      // Salvar todas as copies no histórico
-      if (copies.length > 0 && supabaseClient && user) {
+      // Garantir que todas as copies foram adicionadas
+      if (copies.length > 0) {
+        setGeneratedCopies(copies);
+        
+        // Salvar todas as copies no histórico
+        if (copies.length > 0 && supabaseClient && user) {
         const historyPromises = copies.map(copy => {
           const formDataCopy = copy.dados;
           const title = formDataCopy.oferta_nome || formDataCopy.negocio_nome || formDataCopy.profissional_nome || `${agent.name} - Copy gerada`;
@@ -201,13 +226,21 @@ export default function AgentCopyForm({
           }]);
         });
         
-        Promise.all(historyPromises).catch(err => {
-          console.error('Erro ao salvar histórico:', err);
-        });
+          Promise.all(historyPromises).catch(err => {
+            console.error('Erro ao salvar histórico:', err);
+          });
+        }
+      } else {
+        console.warn('Nenhuma copy foi gerada com sucesso');
+        alert('Não foi possível gerar as copies. Verifique os dados e tente novamente.');
       }
     } catch (error) {
-      console.error('Erro ao adaptar dados do formulário:', error);
-      alert('Erro ao processar o formulário. Verifique os dados e tente novamente.');
+      console.error('Erro ao processar formulário:', error);
+      setGeneratedCopies([]);
+      const errorMessage = error.message || 'Erro desconhecido';
+      alert(`Erro ao gerar copies:\n\n${errorMessage}`);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -251,7 +284,7 @@ export default function AgentCopyForm({
       </motion.div>
 
       {/* Layout de 2 painéis */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden min-h-0">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden min-h-0" style={{ minHeight: '600px' }}>
         {/* Painel Esquerdo - Input */}
         <div className="flex flex-col overflow-hidden min-h-0">
           <div className="mb-4 pb-2 border-b border-white/10 flex-shrink-0">
@@ -372,10 +405,10 @@ export default function AgentCopyForm({
                 )}
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={isGenerating || loading}
                   className="btn-primary flex items-center justify-center gap-3 px-8 py-3 w-full"
                 >
-                  {loading ? (
+                  {(isGenerating || loading) ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                       <span>Gerando {quantity} {quantity === 1 ? 'Copy' : 'Copies'}...</span>
@@ -397,7 +430,7 @@ export default function AgentCopyForm({
           <CopyOutputPanel 
             copies={generatedCopies} 
             agentName={agent.name}
-            loading={loading}
+            loading={isGenerating || loading}
           />
         </div>
       </div>

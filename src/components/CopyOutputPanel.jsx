@@ -29,10 +29,13 @@ export default function CopyOutputPanel({ copies, agentName, loading }) {
 
   // Expandir primeira copy automaticamente quando novas copies são geradas
   useEffect(() => {
-    if (copies && copies.length > 0 && expandedIndex === null) {
-      setExpandedIndex(0);
+    if (copies && copies.length > 0) {
+      // Se não houver nenhuma expandida, expandir a primeira
+      if (expandedIndex === null || expandedIndex === undefined) {
+        setExpandedIndex(0);
+      }
     }
-  }, [copies, expandedIndex]);
+  }, [copies]);
 
   if (loading) {
     return (
@@ -74,7 +77,7 @@ export default function CopyOutputPanel({ copies, agentName, loading }) {
         <AnimatePresence>
           {copies.map((copy, index) => {
             const isExpanded = expandedIndex === index;
-            const fullText = `GANCHO: ${copy.gancho}\n\nCORPO: ${copy.corpo}\n\nCTA: ${copy.cta}`.trim();
+            const fullText = (copy.gancho || '') + (copy.corpo ? `\n\nCORPO: ${copy.corpo}` : '') + (copy.cta ? `\n\nCTA: ${copy.cta}` : '').trim();
             
             return (
               <motion.div
@@ -147,7 +150,7 @@ export default function CopyOutputPanel({ copies, agentName, loading }) {
                               <Mic size={18} />
                             </div>
                             <span className="text-sm font-bold text-primary uppercase tracking-wider">
-                              Gancho
+                              {copy.corpo ? 'Gancho' : 'Gancho (Apenas)'}
                             </span>
                             <button
                               onClick={() => handleCopy(copy.gancho, index, 'gancho')}
@@ -172,7 +175,8 @@ export default function CopyOutputPanel({ copies, agentName, loading }) {
                           </p>
                         </div>
 
-                        {/* Corpo */}
+                        {/* Corpo - só mostrar se houver */}
+                        {copy.corpo && (
                         <div className="relative group">
                           <div className="flex items-center gap-3 mb-3">
                             <div className="p-2 rounded-lg bg-primary/20 text-primary flex-shrink-0">
@@ -213,8 +217,10 @@ export default function CopyOutputPanel({ copies, agentName, loading }) {
                             )}
                           </div>
                         </div>
+                        )}
 
-                        {/* CTA */}
+                        {/* CTA - só mostrar se houver */}
+                        {copy.cta && (
                         <div className="relative group">
                           <div className="flex items-center gap-3 mb-3">
                             <div className="p-2 rounded-lg bg-primary/20 text-primary flex-shrink-0">
@@ -245,6 +251,7 @@ export default function CopyOutputPanel({ copies, agentName, loading }) {
                             {copy.cta}
                           </p>
                         </div>
+                        )}
                       </div>
                     </motion.div>
                   )}

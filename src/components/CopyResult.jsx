@@ -167,18 +167,9 @@ export default function CopyResult({ dados, gancho, corpo, cta, estrategia, onVo
 
             <div className="mt-6 pt-6 border-t border-white/5">
               <p className="text-xs text-text-muted leading-relaxed">
-                Esta copy foi estruturada para ativar o gatilho de {estrategia?.pecado?.nome?.toLowerCase() || 'persuasão'} conectando-se diretamente à dor de {dados.publicoAlvo || dados.publico_descricao || 'seu público-alvo'}.
+                Esta copy foi estruturada para ativar a área emocional relacionada a {estrategia?.pecado?.gatilho?.toLowerCase() || 'persuasão estratégica'}, conectando-se diretamente ao desejo/necessidade de {dados.publicoAlvo || dados.publico_descricao || 'seu público-alvo'}.
               </p>
             </div>
-          </div>
-
-          <div className={cardStyle}>
-            <h4 className="text-sm font-bold text-white mb-4">Dicas de Ouro</h4>
-            <ul className="text-xs text-text-secondary space-y-2">
-              <li className="flex gap-2">• Use uma voz firme e confiante.</li>
-              <li className="flex gap-2">• Mantenha o contato visual (se vídeo).</li>
-              <li className="flex gap-2">• Destaque os {dados.anosExperiencia || dados.anos_experiencia || 'anos'} de experiência.</li>
-            </ul>
           </div>
         </div>
       </div>

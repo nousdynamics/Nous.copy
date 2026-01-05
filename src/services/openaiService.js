@@ -129,7 +129,7 @@ export async function generateWithOpenAI({ prompt, model = "gpt-4.1", instructio
  * @returns {Promise<string>} Gancho gerado pela IA
  */
 export async function gerarGanchoComIA(dados, estrategia) {
-  const instructions = "Você é um copywriter de elite especializado em criar ganchos (hooks) poderosos que capturam atenção imediata e ativam gatilhos psicológicos. Seja específico, criativo e emocional.";
+  const instructions = "Você é um copywriter de elite especializado em criar ganchos (hooks) poderosos que capturam atenção imediata e ativam áreas emocionais estratégicas. Use abordagens lúdicas e persuasivas focadas em desejos/necessidades do negócio. Seja específico, criativo e emocional.";
   
   // Verificações de segurança para evitar erros quando estratégia não está completa
   const pecadoNome = estrategia?.pecado?.nome || 'persuasão';
@@ -140,15 +140,19 @@ export async function gerarGanchoComIA(dados, estrategia) {
   
   const prompt = `Gere um GANCHO poderoso que:
 - Capture a atenção em 3 segundos (máximo 15 palavras)
-- Ative o gatilho psicológico: ${pecadoNome} (${pecadoGatilho})
+- Ative a área emocional relacionada a: ${pecadoGatilho} (use de forma lúdica e estratégica, não literal)
+- Foque no âmbito/desejo: ${pecadoGatilho} - atacando essa área do comportamento/necessidade do público
 - Seja específico e não genérico
 - Crie curiosidade ou validação emocional
+
+IMPORTANTE: O termo "${pecadoNome}" é apenas uma referência estratégica para direcionar a abordagem. Use a área emocional (${pecadoGatilho}) de forma lúdica e persuasiva, focando no desejo/necessidade do negócio, não no sentido literal do termo.
 
 Contexto:
 - Profissional: ${dados.nomeProfissional || dados.profissional_nome || 'Profissional'}
 - Público-alvo: ${dados.publicoAlvo || dados.publico_descricao || 'público-alvo'}
 - Nível de consciência: ${nivelNome} - ${nivelAbordagem}
 - Premissa lógica: ${premissa}
+- Área emocional a ativar: ${pecadoGatilho}
 
 Gere APENAS o gancho, sem explicações adicionais.`;
 
@@ -176,12 +180,15 @@ export async function gerarCorpoComIA(dados, estrategia, gancho) {
 - Desenvolva a Premissa Lógica: ${premissa}
 - Integre a Autoridade do Especialista: ${dados.anosExperiencia || dados.anos_experiencia || 'anos'} de experiência, ${dados.resultadosComprovados || dados.resultados_comprovados || 'resultados comprovados'}
 - Crie urgência ou esperança baseado no nível: ${nivelNome}
+- Ative a área emocional relacionada a: ${estrategia?.pecado?.gatilho || 'persuasão'} (de forma lúdica e estratégica, focando no desejo/necessidade do negócio)
+
+IMPORTANTE: Use a abordagem emocional (${estrategia?.pecado?.gatilho || 'persuasão'}) de forma lúdica e estratégica. O foco é atacar o âmbito/desejo relacionado a essa área emocional do público-alvo, não usar o termo literalmente.
 
 Contexto:
 - Profissional: ${dados.nomeProfissional || dados.profissional_nome || 'Profissional'}
 - Diferencial: ${dados.diferencialCompetitivo || dados.diferencial_competitivo || 'diferencial competitivo'}
 - Público-alvo: ${dados.publicoAlvo || dados.publico_descricao || 'público-alvo'}
-- Pecado Capital: ${pecadoNome}
+- Área emocional a ativar: ${estrategia?.pecado?.gatilho || 'persuasão estratégica'}
 - Metodologia: ${dados.metodologia || dados.metodologia_base || 'metodologia comprovada'}
 
 Gere APENAS o corpo, sem explicações adicionais.`;
@@ -208,11 +215,14 @@ export async function gerarCTAComIA(dados, estrategia) {
 - Crie urgência ou esperança
 - Facilite a ação (não complique)
 - Reforce o benefício final
-- Ative o gatilho: ${pecadoNome}
+- Ative a área emocional relacionada ao desejo/necessidade: ${estrategia?.pecado?.gatilho || 'persuasão'} (de forma lúdica e estratégica)
+
+IMPORTANTE: Use a abordagem emocional de forma lúdica e estratégica, focando no âmbito/desejo do negócio, não no sentido literal.
 
 Contexto:
 - Nível de consciência: ${nivelNome}
 - Plataforma: ${dados.plataforma || dados.canal_principal || 'plataforma digital'}
+- Área emocional a ativar: ${estrategia?.pecado?.gatilho || 'persuasão estratégica'}
 
 Gere APENAS o CTA, sem explicações adicionais.`;
 
