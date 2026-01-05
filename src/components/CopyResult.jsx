@@ -14,9 +14,28 @@ import {
 } from 'lucide-react';
 
 export default function CopyResult({ dados, gancho, corpo, cta, estrategia, onVoltar, onVariacoes, onCopiar, onExportar }) {
-  const isVideo = dados.plataforma.includes('video') || dados.plataforma === 'instagram-reels';
-  const isImage = dados.plataforma === 'meta-ads-imagem' || dados.plataforma === 'google-ads-display';
-  const isGooglePesquisa = dados.plataforma === 'google-ads-pesquisa';
+  // Verificações de segurança para evitar erros quando dados estão incompletos
+  if (!dados) {
+    dados = {};
+  }
+  
+  // Verificar se estratégia existe e tem as propriedades necessárias
+  if (!estrategia) {
+    estrategia = {
+      pecado: { nome: 'Persuasão', gatilho: 'Conversão' },
+      nivel: { nome: 'Consciente' }
+    };
+  }
+  
+  // Garantir que gancho, corpo e cta existam
+  gancho = gancho || 'Gancho não gerado';
+  corpo = corpo || 'Corpo não gerado';
+  cta = cta || 'CTA não gerado';
+  
+  const plataforma = dados.plataforma || dados.canal_principal || '';
+  const isVideo = plataforma && (plataforma.includes('video') || plataforma === 'instagram-reels');
+  const isImage = plataforma === 'meta-ads-imagem' || plataforma === 'google-ads-display';
+  const isGooglePesquisa = plataforma === 'google-ads-pesquisa';
 
   const cardStyle = "glass-card p-6 border-white/5";
   const labelStyle = "text-xs font-bold uppercase tracking-wider text-primary mb-2 block";
@@ -58,9 +77,11 @@ export default function CopyResult({ dados, gancho, corpo, cta, estrategia, onVo
                 {isVideo ? <Video className="text-primary" /> : isImage ? <ImageIcon className="text-primary" /> : <Search className="text-primary" />}
                 Resultado da Copy
               </h3>
-              <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full border border-primary/20">
-                {dados.plataforma.toUpperCase()}
-              </span>
+              {plataforma && (
+                <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full border border-primary/20">
+                  {plataforma.toUpperCase()}
+                </span>
+              )}
             </div>
 
             <div className="space-y-8">
@@ -113,34 +134,40 @@ export default function CopyResult({ dados, gancho, corpo, cta, estrategia, onVo
             </h4>
             
             <div className="space-y-4">
-              <div className="flex gap-3">
-                <CheckCircle2 className="text-primary shrink-0" size={18} />
-                <div>
-                  <span className="text-sm font-bold text-white block">Gatilho Psicológico</span>
-                  <span className="text-sm text-text-secondary">{estrategia.pecado.nome}: {estrategia.pecado.gatilho}</span>
+              {estrategia.pecado && (
+                <div className="flex gap-3">
+                  <CheckCircle2 className="text-primary shrink-0" size={18} />
+                  <div>
+                    <span className="text-sm font-bold text-white block">Gatilho Psicológico</span>
+                    <span className="text-sm text-text-secondary">{estrategia.pecado.nome || 'Persuasão'}: {estrategia.pecado.gatilho || 'Conversão'}</span>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="flex gap-3">
-                <CheckCircle2 className="text-primary shrink-0" size={18} />
-                <div>
-                  <span className="text-sm font-bold text-white block">Nível de Consciência</span>
-                  <span className="text-sm text-text-secondary">{estrategia.nivel.nome}</span>
+              {estrategia.nivel && (
+                <div className="flex gap-3">
+                  <CheckCircle2 className="text-primary shrink-0" size={18} />
+                  <div>
+                    <span className="text-sm font-bold text-white block">Nível de Consciência</span>
+                    <span className="text-sm text-text-secondary">{estrategia.nivel.nome || 'Consciente'}</span>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="flex gap-3">
-                <CheckCircle2 className="text-primary shrink-0" size={18} />
-                <div>
-                  <span className="text-sm font-bold text-white block">Metodologia</span>
-                  <span className="text-sm text-text-secondary">{METODOLOGIAS[dados.metodologia].nome}</span>
+              {dados.metodologia && METODOLOGIAS[dados.metodologia] && (
+                <div className="flex gap-3">
+                  <CheckCircle2 className="text-primary shrink-0" size={18} />
+                  <div>
+                    <span className="text-sm font-bold text-white block">Metodologia</span>
+                    <span className="text-sm text-text-secondary">{METODOLOGIAS[dados.metodologia].nome}</span>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             <div className="mt-6 pt-6 border-t border-white/5">
               <p className="text-xs text-text-muted leading-relaxed">
-                Esta copy foi estruturada para ativar o gatilho de {estrategia.pecado.nome.toLowerCase()} conectando-se diretamente à dor de {dados.publicoAlvo}.
+                Esta copy foi estruturada para ativar o gatilho de {estrategia?.pecado?.nome?.toLowerCase() || 'persuasão'} conectando-se diretamente à dor de {dados.publicoAlvo || dados.publico_descricao || 'seu público-alvo'}.
               </p>
             </div>
           </div>
@@ -150,7 +177,7 @@ export default function CopyResult({ dados, gancho, corpo, cta, estrategia, onVo
             <ul className="text-xs text-text-secondary space-y-2">
               <li className="flex gap-2">• Use uma voz firme e confiante.</li>
               <li className="flex gap-2">• Mantenha o contato visual (se vídeo).</li>
-              <li className="flex gap-2">• Destaque os {dados.anosExperiencia} anos de experiência.</li>
+              <li className="flex gap-2">• Destaque os {dados.anosExperiencia || dados.anos_experiencia || 'anos'} de experiência.</li>
             </ul>
           </div>
         </div>

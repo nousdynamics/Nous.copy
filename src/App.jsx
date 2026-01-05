@@ -325,10 +325,21 @@ function App() {
               )}
             </motion.div>
           ) : (
-            <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }} className="space-y-6">
-              <CopyResult dados={copyData.dados} gancho={copyData.gancho} corpo={copyData.corpo} cta={copyData.cta} estrategia={copyData.estrategia} onVoltar={handleVoltar} onVariacoes={handleVariacoes} onCopiar={handleCopiar} onExportar={handleExportar} />
-              {showVariations && <Variations dados={copyData.dados} onClose={() => setShowVariations(false)} />}
-            </motion.div>
+            copyData ? (
+              <motion.div key="result" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }} className="space-y-6">
+                <CopyResult dados={copyData.dados || {}} gancho={copyData.gancho} corpo={copyData.corpo} cta={copyData.cta} estrategia={copyData.estrategia} onVoltar={handleVoltar} onVariacoes={handleVariacoes} onCopiar={handleCopiar} onExportar={handleExportar} />
+                {showVariations && <Variations dados={copyData.dados || {}} onClose={() => setShowVariations(false)} />}
+              </motion.div>
+            ) : (
+              <motion.div key="result-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                <div className="glass-card p-8 text-center">
+                  <p className="text-text-secondary">Nenhum resultado disponível. Por favor, gere uma nova copy.</p>
+                  <button onClick={handleVoltar} className="btn-primary mt-4">
+                    Voltar ao Gerador
+                  </button>
+                </div>
+              </motion.div>
+            )
           )}
         </AnimatePresence>
       );
