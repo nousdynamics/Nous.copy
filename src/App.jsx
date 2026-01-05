@@ -169,6 +169,9 @@ function App() {
       const canalValue = formData.canal_principal || formData.plataforma || '';
       let formato = 'anuncio_meta_ads'; // padrão
       
+      // Se tiver agentId, usar características específicas do agente
+      const finalAgentId = agentId || formData.agentId || null;
+
       // Mapear valores do select para formatos
       const formatoMap = {
         'vsl': 'vsl',
@@ -178,6 +181,11 @@ function App() {
         'post_redes_sociais': 'post_redes_sociais',
         'roteiro_video_curto': 'roteiro_video_curto',
         'titulos_google_ads': 'titulos_google_ads',
+        // Mapeamentos para novos campos de agentes
+        'video_curto': 'roteiro_video_curto',
+        'arte_estatica': 'anuncio_meta_ads',
+        'carrossel': 'anuncio_meta_ads',
+        'texto_apenas': 'post_redes_sociais',
         // Mapeamentos legados
         'meta-ads': 'anuncio_meta_ads',
         'meta-ads-imagem': 'anuncio_meta_ads',
@@ -186,12 +194,13 @@ function App() {
         'instagram-reels': 'post_redes_sociais'
       };
       
-      if (canalValue) {
-        formato = formatoMap[canalValue] || formatoMap[formData.plataforma] || 'anuncio_meta_ads';
+      if (canalValue || formData.formato_criativo) {
+        formato = formatoMap[canalValue] || formatoMap[formData.formato_criativo] || formatoMap[formData.plataforma] || 'anuncio_meta_ads';
       }
       
-      // Se tiver agentId, usar características específicas do agente
-      const finalAgentId = agentId || formData.agentId || null;
+      // Se for agente de Página de Vendas ou VSL, garantir formato correto
+      if (finalAgentId === 'pagina_vendas') formato = 'pagina_vendas';
+      if (finalAgentId === 'mini_vsl') formato = 'vsl';
       
       // Sempre tentar usar IA primeiro com formatos específicos
       try {

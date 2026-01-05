@@ -4,8 +4,10 @@ export { VELOCIDADE_FALA };
 
 // Análise estratégica
 export function analiseEstrategica(dados) {
-  const pecado = PECADOS_CAPITAIS[dados.pecadoCapital];
-  const nivel = NIVEL_CONSCIENCIA[dados.nivelConsciencia];
+  const pecado = dados.gatilho_principal === 'nenhum' 
+    ? { nome: 'Padrão', gatilho: 'Solução Direta', aplicacao: 'Focar na solução do problema' }
+    : PECADOS_CAPITAIS[dados.pecadoCapital || dados.gatilho_principal];
+  const nivel = NIVEL_CONSCIENCIA[dados.nivelConsciencia || dados.nivel_consciencia || 'sabe_problema'];
   
   // Identificar ponto de dor baseado no público-alvo
   let pontoDor = '';

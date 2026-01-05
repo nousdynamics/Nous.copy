@@ -276,7 +276,7 @@ export const BASE_FIELDS = [
     tipo: FIELD_TYPES.NUMBER,
     bloco: FORM_BLOCKS.OFERTA,
     ordem: 11,
-    placeholder: 'Ex: 5'
+    placeholder: 'Ex: 10 (Mínimo recomendado: 5 min)'
   },
   
   // Bloco: Estratégia de Venda
@@ -297,6 +297,43 @@ export const BASE_FIELDS = [
     ]
   },
   {
+    id: 'formato_criativo',
+    label: 'Formato do Criativo',
+    tipo: FIELD_TYPES.SELECT,
+    bloco: FORM_BLOCKS.ESTRATEGIA_VENDA,
+    ordem: 1.1,
+    opcoes: [
+      { value: 'video_curto', label: 'Vídeo (Reels/TikTok/Ads)' },
+      { value: 'arte_estatica', label: 'Arte Estática (Card/Banner)' },
+      { value: 'carrossel', label: 'Carrossel' },
+      { value: 'texto_apenas', label: 'Apenas Texto/Legenda' }
+    ]
+  },
+  {
+    id: 'duracao_video',
+    label: 'Duração do Vídeo (segundos)',
+    tipo: FIELD_TYPES.SELECT,
+    bloco: FORM_BLOCKS.ESTRATEGIA_VENDA,
+    ordem: 1.2,
+    opcoes: [
+      { value: '15', label: '15 segundos' },
+      { value: '30', label: '30 segundos' },
+      { value: '60', label: '60 segundos' }
+    ]
+  },
+  {
+    id: 'tamanho_texto_arte',
+    label: 'Tamanho do Texto na Arte',
+    tipo: FIELD_TYPES.SELECT,
+    bloco: FORM_BLOCKS.ESTRATEGIA_VENDA,
+    ordem: 1.3,
+    opcoes: [
+      { value: 'curto', label: 'Curto (Direto ao ponto)' },
+      { value: 'medio', label: 'Médio (Explicativo)' },
+      { value: 'longo', label: 'Longo (Informativo)' }
+    ]
+  },
+  {
     id: 'objetivo_campanha',
     label: 'Objetivo da Campanha',
     tipo: FIELD_TYPES.SELECT,
@@ -312,11 +349,12 @@ export const BASE_FIELDS = [
   },
   {
     id: 'gatilho_principal',
-    label: 'Gatilho Principal',
+    label: 'Gatilho Principal (Opcional)',
     tipo: FIELD_TYPES.SELECT,
     bloco: FORM_BLOCKS.ESTRATEGIA_VENDA,
     ordem: 3,
     opcoes: [
+      { value: 'nenhum', label: 'Nenhum (Padrão/Direto)' },
       { value: 'prova_social', label: 'Prova Social' },
       { value: 'autoridade', label: 'Autoridade' },
       { value: 'escassez', label: 'Escassez' },
@@ -324,7 +362,8 @@ export const BASE_FIELDS = [
       { value: 'curiosidade', label: 'Curiosidade' },
       { value: 'reciprocidade', label: 'Reciprocidade' },
       { value: 'novidade', label: 'Novidade' }
-    ]
+    ],
+    defaultValue: 'nenhum'
   },
   {
     id: 'gatilhos_secundarios',

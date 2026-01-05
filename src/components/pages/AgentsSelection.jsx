@@ -20,7 +20,7 @@ const AGENTS = [
     cost: 4,
     description: 'Páginas que vendem de verdade. Com copy estratégica, provas e narrativa que guia o lead até o clique.',
     color: 'from-purple-500 to-purple-700',
-    fields: ['profissional_nome', 'negocio_nome', 'oferta_nome', 'oferta_descricao', 'oferta_preco_principal', 'publico_descricao', 'principal_dor', 'provas_sociais', 'diferencial', 'canal_principal', 'metodologia_base', 'gatilho_principal']
+    fields: ['profissional_nome', 'negocio_nome', 'oferta_nome', 'oferta_descricao', 'oferta_preco_principal', 'publico_descricao', 'principal_dor', 'provas_sociais', 'diferencial', 'metodologia_base', 'gatilho_principal']
   },
   {
     id: 'criativo',
@@ -29,7 +29,7 @@ const AGENTS = [
     cost: 2,
     description: 'Crie anúncios que param o dedo no feed e fazem o lead esquecer que tá vendo propaganda. É emoção, dor e solução em segundos, direto no fígado.',
     color: 'from-blue-500 to-blue-700',
-    fields: ['profissional_nome', 'oferta_nome', 'oferta_descricao', 'publico_descricao', 'principal_dor', 'oferta_preco_principal', 'canal_principal', 'gatilho_principal', 'tom_de_voz', 'estilo_linguagem']
+    fields: ['profissional_nome', 'oferta_nome', 'oferta_descricao', 'publico_descricao', 'principal_dor', 'oferta_preco_principal', 'formato_criativo', 'duracao_video', 'tamanho_texto_arte', 'gatilho_principal', 'tom_de_voz', 'estilo_linguagem']
   },
   {
     id: 'ganchos',
@@ -38,7 +38,7 @@ const AGENTS = [
     cost: 1,
     description: 'Ganchos que quebram o padrão, mordem a curiosidade e puxam o clique. Se não prender em 3 segundos, tá errado.',
     color: 'from-green-500 to-green-700',
-    fields: ['profissional_nome', 'oferta_nome', 'publico_descricao', 'principal_dor', 'gatilho_principal', 'canal_principal', 'curiosidade_ou_dor', 'nivel_consciencia']
+    fields: ['profissional_nome', 'oferta_nome', 'publico_descricao', 'principal_dor', 'gatilho_principal', 'curiosidade_ou_dor', 'nivel_consciencia']
   },
   {
     id: 'mini_vsl',

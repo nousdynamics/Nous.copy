@@ -62,6 +62,13 @@ export default function AgentCopyForm({
     const blocks = {};
     
     agent.fields.forEach(fieldId => {
+      // Lógica de campos condicionais
+      if (fieldId === 'duracao_video' && formData.formato_criativo !== 'video_curto') return;
+      if (fieldId === 'tamanho_texto_arte' && !['arte_estatica', 'carrossel'].includes(formData.formato_criativo)) return;
+      
+      // Se for agente de VSL, garantir que duracao_vsl apareça mesmo se não estiver no fields (segurança)
+      // Mas já está no fields do mini_vsl em AgentsSelection
+      
       const field = getFieldById(fieldId);
       if (field) {
         const blockId = field.bloco || 'outros';
